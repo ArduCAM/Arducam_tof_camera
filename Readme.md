@@ -14,7 +14,8 @@
 ## Compilation
 ```Shell
   mkdir build && cd build
-  cmake .. &&  make
+  cmake .. &&  sudo make install
+  make
 ```
 ## Start
 ### example_c

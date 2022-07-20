@@ -16,13 +16,13 @@
 #include "Semaphore.hpp"
 namespace ArduCam
 {
-    #ifndef DOXYGEN_SHOULD_SKIP_THIS
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     /**
      * @brief
      *
      */
     typedef std::function<void(std::string frame_type, void *frame_ptr)> DoneCallback;
-    #endif /* DOXYGEN_SHOULD_SKIP_THIS */
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     /**
      * @struct CameraInfo
@@ -38,16 +38,22 @@ namespace ArduCam
         unsigned int height;
         unsigned long int imageSize;
     };
+
+    typedef enum {
+    	RANGE,
+        EXPOSURE,
+    } CameraMode;
+
     /**
      * @brief Camera application layer class, used to manage the camera and process frame data
-     * 
+     *
      */
     class ArduCamTOFCamera
     {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 /**
  * @brief Convert data stored in little endian to int16 data
- * 
+ *
  */
 #define CONVERTTORAW(x, y) (((int16_t)(((((uint16_t)(x)) << 8) | (0xff & (y))) << 5)) >> 1)
 #endif
@@ -77,7 +83,7 @@ namespace ArduCam
         /**
          * @brief  Specifies the frame Output Type
          * @note Please call the function operation to reset the frame output format before starting the camera
-         * 
+         *
          * @param type Specify the camera output format.
          *      This parameter can be one of the following values:
          *          @arg RAW_TYPE
@@ -86,6 +92,13 @@ namespace ArduCam
          * @return Return Status code, The returned value can be: OK or ERROR(0 or -1).
          */
         int setOutputType(OutputType type);
+
+        /**
+         * @brief Set the Mode object
+         *
+         * @return int
+         */
+        int setMode(CameraMode mode,int value);
 
         /**
          * @brief Get the Camera frames format.
@@ -98,7 +111,7 @@ namespace ArduCam
          * @brief Request a frame of data from the frame processing thread
          *
          * @param timeout Timeout time, -1 means to wait all the time, 0 means immediate range, other values indicate the maximum waiting time, the unit is milliseconds.
-         * @return ArduCamTOFFrame class address. 
+         * @return ArduCamTOFFrame class address.
          */
         ArduCamTOFFrame *requestFrame(int16_t timeout);
 
@@ -108,7 +121,7 @@ namespace ArduCam
          * @return Return Status code, The returned value can be: OK or ERROR(0 or -1).
          */
         int releaseFrame(ArduCamTOFFrame *);
-    #ifndef DOXYGEN_SHOULD_SKIP_THIS
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     private:
         CameraInfo m_Info;
 
@@ -124,6 +137,12 @@ namespace ArduCam
 
         Semaphore sem_;
 
+        float f_mod = 75e6;       //! Camera light wave modulation frequency
+
+        const float c = 3e8;      //! speed of light
+    
+        const float pi = M_PI; //! π
+
     private:
         void getPhaseAndAmplitudeImage(uint8_t *cache_ptr, float *phase_ptr, float *amplitude_ptr);
 
@@ -137,11 +156,13 @@ namespace ArduCam
 
         void captureThread();
 
+        int setCameraRange(int value);
+
     public:
         ArduCamTOFCamera();
 
         ~ArduCamTOFCamera();
-    #endif
+#endif
     };
 } // namespace ArduCam
 #endif

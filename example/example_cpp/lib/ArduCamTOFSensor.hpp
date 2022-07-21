@@ -89,6 +89,23 @@ namespace ArduCam
          * @return Return Status code.
          */
         int getFrame(uint8_t *data_ptr, struct timeval &timestamp);
+        /**
+         * @brief Switch camera range.
+         * 
+         * @param value Mode value,
+         * This parameter can be one of the following values:
+         *          @arg  0 is 4m range mode
+         *          @arg 1 is 2m range mode
+         * @return Return Status code. 
+         */
+        int setMode(int value);
+        /**
+         * @brief Set camera exposure time.
+         * 
+         * @param value exposure time.The value ​​range is 1 to 65523
+         * @return Return Status code.  
+         */
+        int setExposure(int value);
     };
 
 } // namespace ArduCam

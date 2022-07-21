@@ -32,24 +32,27 @@ void getPreview(uint8_t *preview_ptr, float *phase_image_ptr, float *amplitude_i
         *(preview_ptr + i) = pixel & mask;
     }
 }
-cv::Rect seletRect(0,0,0,0);
-cv::Rect followRect(0,0,0,0);
-void onMouse(int event, int x,int y ,int flags, void* param){
+cv::Rect seletRect(0, 0, 0, 0);
+cv::Rect followRect(0, 0, 0, 0);
+void onMouse(int event, int x, int y, int flags, void *param)
+{
+    if (x < 4 || x > 251 || y < 4 || y > 251)
+        return;
     switch (event)
     {
-    case cv::EVENT_LBUTTONDOWN: 
-        
+    case cv::EVENT_LBUTTONDOWN:
+
         break;
-    
-    case cv::EVENT_LBUTTONUP: 
-        seletRect.x = x-4?x-4:0;
-        seletRect.y = y-4?y-4:0;
+
+    case cv::EVENT_LBUTTONUP:
+        seletRect.x = x - 4 ? x - 4 : 0;
+        seletRect.y = y - 4 ? y - 4 : 0;
         seletRect.width = 8;
         seletRect.height = 8;
         break;
     default:
-        followRect.x = x-4?x-4:0;
-        followRect.y = y-4?y-4:0;
+        followRect.x = x - 4 ? x - 4 : 0;
+        followRect.y = y - 4 ? y - 4 : 0;
         followRect.width = 8;
         followRect.height = 8;
         break;
@@ -65,14 +68,15 @@ int main()
 
     if (tof.start())
         exit(-1);
-
+    // tof.setMode(ArduCam::RANGE,2);
     ArduCam::FrameFormat tofFormat = tof.getFrameFormats();
 
     float *depth_ptr;
     float *amplitude_ptr;
     uint8_t *preview_ptr = new uint8_t[tofFormat.height * tofFormat.width];
-    cv::namedWindow("preview",cv::WINDOW_AUTOSIZE);
-    cv::setMouseCallback("preview",onMouse);
+    cv::namedWindow("preview", cv::WINDOW_AUTOSIZE);
+    cv::setMouseCallback("preview", onMouse);
+
     for (;;)
     {
         frame = tof.requestFrame(200);
@@ -101,9 +105,9 @@ int main()
                 else if(p > 255) p=255; });
             amplitude_frame.convertTo(amplitude_frame, CV_8U);
             cv::imshow("amplitude", amplitude_frame);
-            
-            cv::rectangle(result_frame, seletRect, cv::Scalar(0,0,0),2);
-            cv::rectangle(result_frame, followRect, cv::Scalar(255,255,255),1);
+
+            cv::rectangle(result_frame, seletRect, cv::Scalar(0, 0, 0), 2);
+            cv::rectangle(result_frame, followRect, cv::Scalar(255, 255, 255), 1);
 
             std::cout << "select Rect distance: " << cv::mean(depth_frame(seletRect)).val[0] << std::endl;
 

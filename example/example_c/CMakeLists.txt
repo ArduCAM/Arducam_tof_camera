@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.4)
-# LINK_DIRECTORIES(./lib)
-# include_directories(./lib)
+LINK_DIRECTORIES(./lib)
+include_directories(./lib)
 
 project(Test_C)
 add_executable( test_c test.c )

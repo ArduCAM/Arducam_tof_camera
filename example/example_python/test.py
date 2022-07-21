@@ -1,7 +1,7 @@
 import sys
 import cv2
 import numpy as np
-import ArduCamDepthCamera_Py as ac
+import ArduCamDepthCamera as ac
 
 print(dir(ac))
 

@@ -94,11 +94,11 @@ namespace ArduCam
         int setOutputType(OutputType type);
 
         /**
-         * @brief Set the Mode object
+         * @brief Set camera parameters
          *
-         * @return int
+         * @return Return Status code, The returned value can be: OK or ERROR(0 or -1).
          */
-        int setMode(CameraMode mode,int value);
+        int setControl(CameraMode mode,int value);
 
         /**
          * @brief Get the Camera frames format.

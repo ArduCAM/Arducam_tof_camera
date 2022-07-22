@@ -4,6 +4,12 @@
   sudo apt update
   sudo apt-get install cmake
 ```
+## Configuration
+You need to alter the camera configuration in your /boot/config.txt file.to add dtoverlay.
+```Shell
+  camera_auto_detect=0
+  dtoverlay=arducam,media-controller=0
+```
 ### example_cpp
 ```Shell
   sudo apt update

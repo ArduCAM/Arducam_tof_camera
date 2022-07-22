@@ -1,0 +1,17 @@
+C++ API References
+====================
+
+-----------
+TOFCamera
+-----------
+.. doxygenfile:: ArduCamTOFCamera.hpp
+
+-----------
+TOFFrame
+-----------
+.. doxygenfile:: ArduCamTOFFrame.hpp
+    
+-----------
+TOFSensor
+-----------
+.. doxygenfile:: ArduCamTOFSensor.hpp

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>C API References &mdash; Arducam Tof SDK  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="C++ API References" href="C%2B%2B_API.html" />
+    <link rel="prev" title="Example with Python" href="../Example/python_example.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Arducam Tof SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">CONTENT</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Quick start</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Example/quick_start.html">Quick Start</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Install/install_sdk.html">Installation SDK</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../Install/install_sdk.html#installation-result">Installation result</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Install/install_driver.html">Installation Driver</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Example/c_example.html">Start with C</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../Example/c_example.html#example">example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Example/c_example.html#test-results">Test Results</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/cpp_example.html">Example with CPP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../Example/cpp_example.html#example">example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Example/cpp_example.html#test-results">Test Results</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/python_example.html">Example with Python</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../Example/python_example.html#example">example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Example/python_example.html#test-results">Test Results</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API References</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">C API References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="C%2B%2B_API.html">C++ API References</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="C%2B%2B_API.html#tofcamera">TOFCamera</a></li>
+<li class="toctree-l2"><a class="reference internal" href="C%2B%2B_API.html#tofframe">TOFFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="C%2B%2B_API.html#tofsensor">TOFSensor</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Arducam Tof SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>C API References</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/API/C_API.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="c-api-references">
+<h1>C API References<a class="headerlink" href="#c-api-references" title="Permalink to this heading"></a></h1>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.Status">
+<span class="target" id="ArduCamDepthCamera_8h_1a7f5d97e77e23c44ac5c59e6729f49075"></span><span class="sig-name descname"><span class="n"><span class="pre">Status</span></span></span><a class="headerlink" href="#c.Status" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-enums">Enums</p>
+<dl class="cpp enum">
+<dt class="sig sig-object cpp" id="_CPPv49FrameType">
+<span id="_CPPv39FrameType"></span><span id="_CPPv29FrameType"></span><span class="target" id="ArduCamDepthCamera_8h_1ad495a9f61af7fff07d7e97979d1ab854"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">FrameType</span></span></span><a class="headerlink" href="#_CPPv49FrameType" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Some types of frame data. </p>
+<p><em>Values:</em></p>
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N9FrameType9RAW_FRAMEE">
+<span id="_CPPv3N9FrameType9RAW_FRAMEE"></span><span id="_CPPv2N9FrameType9RAW_FRAMEE"></span><span class="target" id="ArduCamDepthCamera_8h_1ad495a9f61af7fff07d7e97979d1ab854a05adb1c5753f4e7724ae75d59d7b3bf0"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">RAW_FRAME</span></span></span><a class="headerlink" href="#_CPPv4N9FrameType9RAW_FRAMEE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N9FrameType15AMPLITUDE_FRAMEE">
+<span id="_CPPv3N9FrameType15AMPLITUDE_FRAMEE"></span><span id="_CPPv2N9FrameType15AMPLITUDE_FRAMEE"></span><span class="target" id="ArduCamDepthCamera_8h_1ad495a9f61af7fff07d7e97979d1ab854ab06628da84610e068bd218888c9140e4"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">AMPLITUDE_FRAME</span></span></span><a class="headerlink" href="#_CPPv4N9FrameType15AMPLITUDE_FRAMEE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N9FrameType11DEPTH_FRAMEE">
+<span id="_CPPv3N9FrameType11DEPTH_FRAMEE"></span><span id="_CPPv2N9FrameType11DEPTH_FRAMEE"></span><span class="target" id="ArduCamDepthCamera_8h_1ad495a9f61af7fff07d7e97979d1ab854a6170b2a80713338edb5fca40309fbfa2"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">DEPTH_FRAME</span></span></span><a class="headerlink" href="#_CPPv4N9FrameType11DEPTH_FRAMEE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N9FrameType16FRAME_TYPE_COUNTE">
+<span id="_CPPv3N9FrameType16FRAME_TYPE_COUNTE"></span><span id="_CPPv2N9FrameType16FRAME_TYPE_COUNTE"></span><span class="target" id="ArduCamDepthCamera_8h_1ad495a9f61af7fff07d7e97979d1ab854a492f3f89e7815c3fd56b8a5efc384593"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">FRAME_TYPE_COUNT</span></span></span><a class="headerlink" href="#_CPPv4N9FrameType16FRAME_TYPE_COUNTE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="cpp enum">
+<dt class="sig sig-object cpp" id="_CPPv410OutputType">
+<span id="_CPPv310OutputType"></span><span id="_CPPv210OutputType"></span><span class="target" id="ArduCamDepthCamera_8h_1a4e0517338e6c4a31a2addafc06d4f3a3"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OutputType</span></span></span><a class="headerlink" href="#_CPPv410OutputType" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The output type of the frame, the RAW type outputs RAW_FRAME, the DEPTH type outputs DEPTH_FRAME and AMPLITUDE_FRAME. </p>
+<p><em>Values:</em></p>
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N10OutputType8RAW_TYPEE">
+<span id="_CPPv3N10OutputType8RAW_TYPEE"></span><span id="_CPPv2N10OutputType8RAW_TYPEE"></span><span class="target" id="ArduCamDepthCamera_8h_1a4e0517338e6c4a31a2addafc06d4f3a3aa7b158b7d37e5c3b136106735275bf04"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">RAW_TYPE</span></span></span><a class="headerlink" href="#_CPPv4N10OutputType8RAW_TYPEE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N10OutputType10DEPTH_TYPEE">
+<span id="_CPPv3N10OutputType10DEPTH_TYPEE"></span><span id="_CPPv2N10OutputType10DEPTH_TYPEE"></span><span class="target" id="ArduCamDepthCamera_8h_1a4e0517338e6c4a31a2addafc06d4f3a3a5ca08fd23bccc767a4f41d545326d155"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">DEPTH_TYPE</span></span></span><a class="headerlink" href="#_CPPv4N10OutputType10DEPTH_TYPEE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N10OutputType17OUTPUT_TYPE_COUNTE">
+<span id="_CPPv3N10OutputType17OUTPUT_TYPE_COUNTE"></span><span id="_CPPv2N10OutputType17OUTPUT_TYPE_COUNTE"></span><span class="target" id="ArduCamDepthCamera_8h_1a4e0517338e6c4a31a2addafc06d4f3a3a1ad17fd4ffb809f5f358d0b9eb96bcd5"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OUTPUT_TYPE_COUNT</span></span></span><a class="headerlink" href="#_CPPv4N10OutputType17OUTPUT_TYPE_COUNTE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv424createArducamDepthCamerav">
+<span id="_CPPv324createArducamDepthCamerav"></span><span id="_CPPv224createArducamDepthCamerav"></span><span id="createArducamDepthCamera"></span><span class="target" id="ArduCamDepthCamera_8h_1a56d64d48b02257c3316b48310236a907"></span><span class="n"><span class="pre">ArducamDepthCamera</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">createArducamDepthCamera</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv424createArducamDepthCamerav" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Create a camera instance. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Return a ArducamDepthCamera instance. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv410initialize18ArducamDepthCamera10OutputType">
+<span id="_CPPv310initialize18ArducamDepthCamera10OutputType"></span><span id="_CPPv210initialize18ArducamDepthCamera10OutputType"></span><span id="initialize__ArducamDepthCamera.OutputType"></span><span class="target" id="ArduCamDepthCamera_8h_1a9b6542383949e69dec48e5b81867eb74"></span><span class="n"><span class="pre">Status</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">initialize</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ArducamDepthCamera</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">camera</span></span>, <a class="reference internal" href="#_CPPv410OutputType" title="OutputType"><span class="n"><span class="pre">OutputType</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">type</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv410initialize18ArducamDepthCamera10OutputType" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Initialize the camera configuration and turn on the camera, set the initialization frame according to the type. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>camera</strong> – Camera instance, obtained through createArducamDepthCamera() </p></li>
+<li><p><strong>type</strong> – Type of camera output fame..</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return Status code. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv45start18ArducamDepthCamera">
+<span id="_CPPv35start18ArducamDepthCamera"></span><span id="_CPPv25start18ArducamDepthCamera"></span><span id="start__ArducamDepthCamera"></span><span class="target" id="ArduCamDepthCamera_8h_1a9aef646628f68bc6e26c0767fb3f5da2"></span><span class="n"><span class="pre">Status</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">start</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ArducamDepthCamera</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">camera</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv45start18ArducamDepthCamera" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Start the camera stream and start processing. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>camera</strong> – Camera instance.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return Status code. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv44stop18ArducamDepthCamera">
+<span id="_CPPv34stop18ArducamDepthCamera"></span><span id="_CPPv24stop18ArducamDepthCamera"></span><span id="stop__ArducamDepthCamera"></span><span class="target" id="ArduCamDepthCamera_8h_1a5b3b231ae841fa8064f286f4e9647a1b"></span><span class="n"><span class="pre">Status</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">stop</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ArducamDepthCamera</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">camera</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv44stop18ArducamDepthCamera" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Stop camera stream and processing. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>camera</strong> – Camera instance.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return Status code. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv49getFormat11FrameBuffer9FrameType">
+<span id="_CPPv39getFormat11FrameBuffer9FrameType"></span><span id="_CPPv29getFormat11FrameBuffer9FrameType"></span><span id="getFormat__FrameBuffer.FrameType"></span><span class="target" id="ArduCamDepthCamera_8h_1a6c61d04cb5df661b1df8cd12825d4990"></span><a class="reference internal" href="#_CPPv411FrameFormat" title="FrameFormat"><span class="n"><span class="pre">FrameFormat</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getFormat</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">FrameBuffer</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">fb</span></span>, <a class="reference internal" href="#_CPPv49FrameType" title="FrameType"><span class="n"><span class="pre">FrameType</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">type</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv49getFormat11FrameBuffer9FrameType" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get the format of the specified frame. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>camera</strong> – Frame instance. </p></li>
+<li><p><strong>format</strong> – Frame type. This parameter can be one of the following values: <ul>
+<li><p>RAW_FRAME </p></li>
+<li><p>AMPLITUDE_FRAME </p></li>
+<li><p>DEPTH_FRAME</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return frame format. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv412requestFrame18ArducamDepthCamerai">
+<span id="_CPPv312requestFrame18ArducamDepthCamerai"></span><span id="_CPPv212requestFrame18ArducamDepthCamerai"></span><span id="requestFrame__ArducamDepthCamera.i"></span><span class="target" id="ArduCamDepthCamera_8h_1a446783fb425f2a31f2cd693db769144f"></span><span class="n"><span class="pre">FrameBuffer</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">requestFrame</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ArducamDepthCamera</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">camera</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">timeout</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412requestFrame18ArducamDepthCamerai" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Read frame from the camera. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>camera</strong> – Camera instance. </p></li>
+<li><p><strong>timeout</strong> – Timeout time, -1 means to wait all the time, 0 means immediate range, other values indicate the maximum waiting time, the unit is milliseconds.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return Status code. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv412releaseFrame18ArducamDepthCamera11FrameBuffer">
+<span id="_CPPv312releaseFrame18ArducamDepthCamera11FrameBuffer"></span><span id="_CPPv212releaseFrame18ArducamDepthCamera11FrameBuffer"></span><span id="releaseFrame__ArducamDepthCamera.FrameBuffer"></span><span class="target" id="ArduCamDepthCamera_8h_1a93a1b0f6a41a5a2621f8fc206f55b125"></span><span class="n"><span class="pre">Status</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">releaseFrame</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ArducamDepthCamera</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">camera</span></span>, <span class="n"><span class="pre">FrameBuffer</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">fb</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412releaseFrame18ArducamDepthCamera11FrameBuffer" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Release the FrameBuffer. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>camera</strong> – Camera instance. </p></li>
+<li><p><strong>fb</strong> – FrameBuffer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return Status code. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv412getDepthData11FrameBuffer">
+<span id="_CPPv312getDepthData11FrameBuffer"></span><span id="_CPPv212getDepthData11FrameBuffer"></span><span id="getDepthData__FrameBuffer"></span><span class="target" id="ArduCamDepthCamera_8h_1ab9203b6b92b6d4acee9cfb4e7556db4c"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">getDepthData</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">FrameBuffer</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">fb</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412getDepthData11FrameBuffer" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Read depth data from the frame. </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The output mode is the depth type, and the function can be called to obtain data</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fb</strong> – dataframe object.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return Status code. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416getAmplitudeData11FrameBuffer">
+<span id="_CPPv316getAmplitudeData11FrameBuffer"></span><span id="_CPPv216getAmplitudeData11FrameBuffer"></span><span id="getAmplitudeData__FrameBuffer"></span><span class="target" id="ArduCamDepthCamera_8h_1a52ae0a3eac8f6f0df1cf811b66c17349"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">getAmplitudeData</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">FrameBuffer</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">fb</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416getAmplitudeData11FrameBuffer" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Read depth data from the frame. </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The output mode is the depth type, and the function can be called to obtain data.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fb</strong> – dataframe object.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return Status code. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv410getRawData11FrameBuffer">
+<span id="_CPPv310getRawData11FrameBuffer"></span><span id="_CPPv210getRawData11FrameBuffer"></span><span id="getRawData__FrameBuffer"></span><span class="target" id="ArduCamDepthCamera_8h_1a8b4cffc0304669ea9ad5e9e1e56283f0"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">getRawData</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">FrameBuffer</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">fb</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv410getRawData11FrameBuffer" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Read raw data from the frame. </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The output mode is the raw type, and the function can be called to obtain data.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fb</strong> – dataframe object.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return Status code. </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv411FrameFormat">
+<span id="_CPPv311FrameFormat"></span><span id="_CPPv211FrameFormat"></span><span id="FrameFormat"></span><span class="target" id="structFrameFormat"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">FrameFormat</span></span></span><a class="headerlink" href="#_CPPv411FrameFormat" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;ArduCamDepthCamera.h&gt;</em></div>
+<p>Description of frame data format. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N11FrameFormat5widthE">
+<span id="_CPPv3N11FrameFormat5widthE"></span><span id="_CPPv2N11FrameFormat5widthE"></span><span id="FrameFormat::width__uint16_t"></span><span class="target" id="structFrameFormat_1a684ed22c76cd5d3df07df10868dcdd0f"></span><span class="n"><span class="pre">uint16_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">width</span></span></span><a class="headerlink" href="#_CPPv4N11FrameFormat5widthE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N11FrameFormat6heightE">
+<span id="_CPPv3N11FrameFormat6heightE"></span><span id="_CPPv2N11FrameFormat6heightE"></span><span id="FrameFormat::height__uint16_t"></span><span class="target" id="structFrameFormat_1af2e0c35854b2c0ec48400bdd96a883d9"></span><span class="n"><span class="pre">uint16_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">height</span></span></span><a class="headerlink" href="#_CPPv4N11FrameFormat6heightE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>width of frame </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N11FrameFormat4typeE">
+<span id="_CPPv3N11FrameFormat4typeE"></span><span id="_CPPv2N11FrameFormat4typeE"></span><span id="FrameFormat::type__FrameType"></span><span class="target" id="structFrameFormat_1a3a571f486411f3f466f71ab1027cf83c"></span><a class="reference internal" href="#_CPPv49FrameType" title="FrameType"><span class="n"><span class="pre">FrameType</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">type</span></span></span><a class="headerlink" href="#_CPPv4N11FrameFormat4typeE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>height of frame </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N11FrameFormat8bitdepthE">
+<span id="_CPPv3N11FrameFormat8bitdepthE"></span><span id="_CPPv2N11FrameFormat8bitdepthE"></span><span id="FrameFormat::bitdepth__uint8_t"></span><span class="target" id="structFrameFormat_1aa6e8e39790c8842e5d3161f59dbef19b"></span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">bitdepth</span></span></span><a class="headerlink" href="#_CPPv4N11FrameFormat8bitdepthE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>type of frame </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../Example/python_example.html" class="btn btn-neutral float-left" title="Example with Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="C%2B%2B_API.html" class="btn btn-neutral float-right" title="C++ API References" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Arducam.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

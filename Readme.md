@@ -1,4 +1,9 @@
 ## Install dependencies
+### project dependencies
+```Shell
+  sudo apt update
+  sudo apt-get install cmake
+```
 ### example_cpp
 ```Shell
   sudo apt update

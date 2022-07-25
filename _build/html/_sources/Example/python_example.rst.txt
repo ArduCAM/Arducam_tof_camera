@@ -1,0 +1,37 @@
+Example with Python
+====================
+    There are several steps to get camera data: 
+        1. create a camera instance.
+        2. initialize camera instance.
+        3. start the camera.
+        4. request a frame.
+        5. get frame data
+        6. release frame space
+        7. stop the camera
+
+----------        
+example
+----------
+    ::
+        
+        cam = ac.ArducamCamera()
+        cam.initialize(ac.TOFOutput.RAW)
+        cam.start()
+        while True:
+            frame = cam.requestFrame(200)
+            buf = frame.getRawData()
+            cam.releaseFrame(frame)
+            cv2.imshow("window", buf.astype(np.float32))
+            key = cv2.waitKey(1)
+            if key == ord("q"):
+                cam.stop()
+                sys.exit(0)
+
+.. note:: For specific function usage details, please refer to the API
+
+-------------
+Test Results
+-------------
+.. image:: ../_static/images/python_test.png
+   :alt: python_test
+   :align: center

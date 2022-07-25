@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Start with C &mdash; Arducam Tof SDK  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Example with CPP" href="cpp_example.html" />
+    <link rel="prev" title="Installation Driver" href="../Install/install_driver.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Arducam Tof SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">CONTENT</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Quick start</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Install/install_sdk.html">Installation SDK</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../Install/install_sdk.html#installation-result">Installation result</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Install/install_driver.html">Installation Driver</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Start with C</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example">example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-results">Test Results</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cpp_example.html">Example with CPP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cpp_example.html#example">example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cpp_example.html#test-results">Test Results</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="python_example.html">Example with Python</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="python_example.html#example">example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python_example.html#test-results">Test Results</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../API/C_API.html">C API References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../API/C%2B%2B_API.html">C++ API References</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../API/C%2B%2B_API.html#tofcamera">TOFCamera</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../API/C%2B%2B_API.html#tofframe">TOFFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../API/C%2B%2B_API.html#tofsensor">TOFSensor</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Arducam Tof SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Start with C</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Example/c_example.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="start-with-c">
+<h1>Start with C<a class="headerlink" href="#start-with-c" title="Permalink to this heading"></a></h1>
+<blockquote>
+<div><dl class="simple">
+<dt>There are several steps to get camera data:</dt><dd><ol class="arabic simple">
+<li><p>create a camera instance.</p></li>
+<li><p>start the camera.</p></li>
+<li><p>request a frame.</p></li>
+<li><p>get frame data</p></li>
+<li><p>release frame space</p></li>
+<li><p>stop the camera</p></li>
+</ol>
+</dd>
+</dl>
+</div></blockquote>
+<div class="section" id="example">
+<h2>example<a class="headerlink" href="#example" title="Permalink to this heading"></a></h2>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ArducamDepthCamera</span> <span class="n">tof</span> <span class="o">=</span> <span class="n">createArducamDepthCamera</span><span class="p">();</span>
+<span class="n">FrameBuffer</span> <span class="n">frame</span><span class="p">;</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">initialize</span><span class="p">(</span><span class="n">tof</span><span class="p">,</span><span class="n">DEPTH_TYPE</span><span class="p">))</span>
+    <span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">start</span><span class="p">(</span><span class="n">tof</span><span class="p">))</span>
+    <span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+
+<span class="n">FrameFormat</span> <span class="nb">format</span><span class="p">;</span>
+<span class="k">if</span> <span class="p">((</span><span class="n">frame</span> <span class="o">=</span> <span class="n">requestFrame</span><span class="p">(</span><span class="n">tof</span><span class="p">,</span><span class="mi">200</span><span class="p">))</span> <span class="o">!=</span> <span class="mh">0x00</span><span class="p">){</span>
+    <span class="n">getFormat</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span><span class="n">DEPTH_FRAME</span><span class="p">,</span><span class="nb">format</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="n">releaseFrame</span><span class="p">(</span><span class="n">tof</span><span class="p">,</span><span class="n">frame</span><span class="p">);</span>
+<span class="n">uint8_t</span> <span class="o">*</span><span class="n">preview_ptr</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="nb">format</span><span class="o">.</span><span class="n">width</span><span class="o">*</span><span class="nb">format</span><span class="o">.</span><span class="n">height</span><span class="o">*</span><span class="n">sizeof</span><span class="p">(</span><span class="n">uint8_t</span><span class="p">))</span> <span class="p">;</span>
+<span class="nb">float</span><span class="o">*</span> <span class="n">depth_ptr</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">int16_t</span> <span class="o">*</span><span class="n">raw_ptr</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="nb">float</span> <span class="o">*</span><span class="n">amplitude_ptr</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">for</span> <span class="p">(;;)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">((</span><span class="n">frame</span> <span class="o">=</span> <span class="n">requestFrame</span><span class="p">(</span><span class="n">tof</span><span class="p">,</span><span class="mi">200</span><span class="p">))</span> <span class="o">!=</span> <span class="mh">0x00</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">depth_ptr</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="o">*</span><span class="p">)</span><span class="n">getDepthData</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span>
+        <span class="n">amplitude_ptr</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="o">*</span><span class="p">)</span><span class="n">getAmplitudeData</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span>
+        <span class="n">getPreview</span><span class="p">(</span><span class="n">preview_ptr</span><span class="p">,</span><span class="n">depth_ptr</span><span class="p">,</span><span class="n">amplitude_ptr</span><span class="p">);</span>
+        <span class="n">releaseFrame</span><span class="p">(</span><span class="n">tof</span><span class="p">,</span><span class="n">frame</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">stop</span><span class="p">(</span><span class="n">tof</span><span class="p">))</span>
+    <span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For specific function usage details, please refer to the API</p>
+</div>
+</div>
+<div class="section" id="test-results">
+<h2>Test Results<a class="headerlink" href="#test-results" title="Permalink to this heading"></a></h2>
+<img alt="c_test" class="align-center" src="../_images/c_test.png" />
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../Install/install_driver.html" class="btn btn-neutral float-left" title="Installation Driver" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cpp_example.html" class="btn btn-neutral float-right" title="Example with CPP" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Arducam.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

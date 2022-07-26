@@ -19,6 +19,7 @@ You need to alter the camera configuration in your /boot/config.txt file.to add 
 ### example_cpp
 ```Shell
   sudo apt update
+  sudo apt upgrade
   sudo apt-get install build-essential
   sudo apt-get install libopencv-dev
 ```

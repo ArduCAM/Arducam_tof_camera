@@ -13,9 +13,9 @@
 ## Configuration
 You need to alter the camera configuration in your /boot/config.txt file.to add dtoverlay.
 ```Shell
-  camera_auto_detect=0
   dtoverlay=arducam,media-controller=0
 ```
+> To override the automatic camera detection, Bullseye users will also need to delete the entry camera_auto_detect=1 if present in the config.txt file. Your Raspberry Pi will need to be rebooted after editing this file
 ### example_cpp
 ```Shell
   sudo apt update
@@ -36,14 +36,17 @@ You need to alter the camera configuration in your /boot/config.txt file.to add 
 ```
 ## Start
 ### example_c
+> Run in the build folder
 ```Shell
   ./example_c/test_c
 ```
 ### example_cpp
+> Run in the build folder
 ```Shell
-  ./example_c/test_cpp
+  ./example_cpp/test_cpp
 ```
 ### example_python
+> Run in the example folder
 ```Shell
   cd ../example/example_python/
   python test.py

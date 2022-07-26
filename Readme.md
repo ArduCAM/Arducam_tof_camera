@@ -31,6 +31,7 @@ You need to alter the camera configuration in your /boot/config.txt file.to add 
 ```
 ## Compilation
 ```Shell
+  cd Arducam_tof_camera/example
   mkdir build && cd build
   cmake .. &&  sudo make install
   make

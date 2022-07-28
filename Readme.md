@@ -17,6 +17,7 @@
   chmod +x Install_dependencies.sh
   ./Install_dependencies.sh
 ```
+> You can also manually install and compile according to the following steps
 ## Install dependencies
 ### project dependencies
 ```Shell

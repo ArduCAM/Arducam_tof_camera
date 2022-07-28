@@ -1,3 +1,22 @@
+## Run project 
+### 1. driver Install
+```Shell
+  wget -O install_pivariety_pkgs.sh https://github.com/ArduCAM/Arducam-Pivariety-V4L2-Driver/releases/download/install_script/install_pivariety_pkgs.sh
+  chmod +x install_pivariety_pkgs.sh
+  ./install_pivariety_pkgs.sh -p kernel_driver
+```
+### 2.Install dependencies
+> Run in the Arducam_tof_camera folder
+```Shell
+  chmod +x Install_dependencies.sh
+  ./Install_dependencies.sh
+```
+### 3.compile && run
+> Run in the Arducam_tof_camera folder
+```Shell
+  chmod +x Install_dependencies.sh
+  ./Install_dependencies.sh
+```
 ## Install dependencies
 ### project dependencies
 ```Shell

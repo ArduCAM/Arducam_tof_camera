@@ -1,4 +1,0 @@
-C API References
-====================
-
-.. doxygenfile:: ArduCamDepthCamera.h

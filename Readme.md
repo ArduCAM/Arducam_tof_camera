@@ -14,8 +14,8 @@
 ### 3.compile && run
 > Run in the Arducam_tof_camera folder
 ```Shell
-  chmod +x Install_dependencies.sh
-  ./Install_dependencies.sh
+  chmod +x compile.sh
+  ./compile.sh
 ```
 > You can also manually install and compile according to the following steps
 ## Install dependencies
@@ -38,9 +38,9 @@ You need to alter the camera configuration in your /boot/config.txt file.to add 
 > To override the automatic camera detection, Bullseye users will also need to delete the entry camera_auto_detect=1 if present in the config.txt file. Your Raspberry Pi will need to be rebooted after editing this file
 ### example_cpp
 ```Shell
-  sudo apt update
-  sudo apt upgrade
+  sudo apt-get update
   sudo apt-get install build-essential
+  sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev 
   sudo apt-get install libopencv-dev
 ```
 ### example_python

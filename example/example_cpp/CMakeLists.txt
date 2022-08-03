@@ -5,8 +5,12 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 LINK_DIRECTORIES(./lib)
 include_directories(./lib)
 
-project(Test_CPP)
-add_executable(test_cpp test.cpp )
-target_link_libraries( test_cpp ArducamDepthCamera  ${OpenCV_LIBS} )
+project(PreviewDeptah)
+add_executable(preview_deptah preview_depth.cpp )
+target_link_libraries( preview_deptah ArducamDepthCamera  ${OpenCV_LIBS} )
+
+project(CaptureRaw)
+add_executable(capture_raw capture_raw.cpp )
+target_link_libraries( capture_raw ArducamDepthCamera  ${OpenCV_LIBS} )
 
 add_subdirectory(lib)

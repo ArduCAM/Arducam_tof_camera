@@ -3,19 +3,17 @@ import cv2
 import numpy as np
 import ArduCamDepthCamera as ac
 
-print(dir(ac))
-
-print(dir(ac.ArducamCamera()))
 if __name__ == "__main__":
     cam = ac.ArducamCamera()
-    cam.initialize(ac.TOFOutput.RAW)
-    cam.start()
+    if cam.initialize(ac.TOFOutput.RAW) != 0 :
+        print("initialization failed")
+    if cam.start() != 0 :
+        print("Failed to start camera")
+
     while True:
         frame = cam.requestFrame(200)
         buf = frame.getRawData()
         cam.releaseFrame(frame)
-        # raw = cv2.Mat(buf)
-        # print(buf)
         cv2.imshow("window", buf.astype(np.float32))
         key = cv2.waitKey(1)
         if key == ord("q"):

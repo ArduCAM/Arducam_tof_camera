@@ -5,7 +5,8 @@
 #include <chrono>
 #include <iostream>
 
-#define MAX_DISTANCE 2
+#define MAX_DISTANCE 4
+
 void display_fps(void)
 {
     static int count = 0;
@@ -63,11 +64,16 @@ int main()
 {
     ArduCam::ArduCamTOFCamera tof;
     ArduCam::ArduCamTOFFrame *frame;
-    if (tof.initialize(ArduCam::DEPTH_TYPE))
+    if (tof.initialize(ArduCam::RAW_TYPE)){
+        std::cerr<<"initialization failed"<<std::endl;
         exit(-1);
+    }
 
-    if (tof.start())
+    if (tof.start()){
+        std::cerr<<"Failed to start camera"<<std::endl;
         exit(-1);
+    }
+    //  Modify the range also to modify the MAX_DISTANCE value
     // tof.setMode(ArduCam::RANGE,2);
     ArduCam::FrameFormat tofFormat = tof.getFrameFormats();
 
@@ -82,12 +88,6 @@ int main()
         frame = tof.requestFrame(200);
         if (frame != nullptr)
         {
-            //  frame->getFrameData("raw",(void**)&raw_ptr);
-            //  cv::Mat raw_frame(720, 240, CV_16S, raw_ptr);
-            //  raw_frame.convertTo(raw_frame,CV_32F);
-            //  cv::imshow("preview", raw_frame);
-            // std::cout << "mean: " << cv::mean(raw_frame).val[0] << std::endl;
-
             depth_ptr = (float *)frame->getFrameData(ArduCam::DEPTH_FRAME);
             amplitude_ptr = (float *)frame->getFrameData(ArduCam::AMPLITUDE_FRAME);
             getPreview(preview_ptr, depth_ptr, amplitude_ptr);
@@ -97,7 +97,6 @@ int main()
             cv::Mat amplitude_frame(tofFormat.height, tofFormat.width, CV_32F, amplitude_ptr);
 
             cv::applyColorMap(result_frame, result_frame, cv::COLORMAP_JET);
-            // std::cout << "amplitude_frame mean: " << cv::mean(amplitude_frame).val[0] << std::endl;
 
             amplitude_frame.forEach<float>([](float &p, const int *position) -> void
                                            {   

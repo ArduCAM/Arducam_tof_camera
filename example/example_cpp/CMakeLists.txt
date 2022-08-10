@@ -6,7 +6,7 @@ LINK_DIRECTORIES(./lib)
 include_directories(./lib)
 
 project(PreviewDeptah)
-add_executable(preview_deptah preview_depth.cpp )
+add_executable(preview_depth preview_depth.cpp )
 target_link_libraries( preview_deptah ArducamDepthCamera  ${OpenCV_LIBS} )
 
 project(CaptureRaw)

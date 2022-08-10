@@ -5,4 +5,4 @@ mkdir build
 cd build
 cmake ..
 sudo make install
-./example_cpp/test_cpp
+./example_cpp/preview_depth

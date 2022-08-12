@@ -1,108 +1,48 @@
 #ifndef __TOF_FRAME_H
 #define __TOF_FRAME_H
 
-#include <vector>
-#include <memory>
-#include <cstdint>
-#include <map>
-#include <unordered_map>
-#include <algorithm>
-#include <cstring>
+#include "ArduCamTOFUnity.hpp"
+#include "ArduCamTOFLinkList.hpp"
 
 namespace ArduCam
 {
     /**
-     * @brief Some types of frame data
-     * 
-     */
-    typedef enum
-    {
-        RAW_FRAME = 0,
-        AMPLITUDE_FRAME,
-        DEPTH_FRAME,
-        CACHE_FRAME,
-        FRAME_TYPE_COUNT,
-    } FrameType;
-    /**
-     * @brief The output type of the frame, the RAW type outputs RAW_FRAME, the DEPTH type outputs DEPTH_FRAME and AMPLITUDE_FRAME
-     * 
-     */
-    typedef enum
-    {
-        RAW_TYPE = 0,
-        DEPTH_TYPE,
-        OUTPUT_TYPE_COUNT,
-    } OutputType;
-    /**
-     * @brief Description of frame data format
-     * 
-     */
-    typedef struct
-    {
-        unsigned int width;  //! width of frame
-        unsigned int height; //! height of frame
-        FrameType type;      //! type of frame
-        uint8_t bitdepth;
-    } FrameDataFormat;
-    /**
-     * @brief Frame description for the frame data set
-     * 
-     */
-    typedef struct
-    {
-        OutputType type;
-        std::vector<FrameDataFormat> dataFormats;
-        unsigned int width;
-        unsigned int height;
-    } FrameFormat;
-
-    #ifndef DOXYGEN_SHOULD_SKIP_THIS
-    bool operator==(const FrameDataFormat &lhs, const FrameDataFormat &rhs);
-
-    bool operator!=(const FrameDataFormat &lhs, const FrameDataFormat &rhs);
-
-    bool operator==(const FrameFormat &lhs, const FrameFormat &rhs);
-
-    bool operator!=(const FrameFormat &lhs, const FrameFormat &rhs);
-    #endif
-    /**
      * @brief Memory space management for saving frame formats and frames
-     * 
+     *
      */
     class ArduCamTOFFrame
     {
-    #ifndef DOXYGEN_SHOULD_SKIP_THIS
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     private:
-        struct ImplData;
         FrameFormat m_Infos;
-        std::unique_ptr<ImplData> m_implData;
-        // std::map<std::string, std::string> m_attributes;
-    #endif
+        std::unique_ptr<LinkList> m_implData;
+        std::unique_ptr<CacheData> m_cache;
+#endif
     public:
         struct timeval m_timestamp;
-    #ifndef DOXYGEN_SHOULD_SKIP_THIS
-    private:
-        void allocFrameData(const FrameFormat &details);
- 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    // private:
+    //     void allocFrameData(const FrameFormat &details);
+
     public:
-        ArduCamTOFFrame();
-    #endif
+        // ArduCamTOFFrame();
+#endif
         /**
          * @brief Construct a frame instance according to the frame format data and apply for memory space.
-         * 
+         *
          */
         ArduCamTOFFrame(const FrameFormat &);
-    #ifndef DOXYGEN_SHOULD_SKIP_THIS
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
         ~ArduCamTOFFrame();
         /**
          * @brief deep copy
-         * 
+         *
          */
         ArduCamTOFFrame(const ArduCamTOFFrame &);
-    #endif
+#endif
         /**
          * @brief deep copy
-         * 
+         *
          * @param a_fm ArduCamTOFFrame class instance.
          */
         ArduCamTOFFrame(const std::shared_ptr<ArduCamTOFFrame> a_fm);
@@ -149,7 +89,18 @@ namespace ArduCam
          *          - float*   : DEPTH_FRAME
          *          - float*   : AMPLITUDE_FRAME
          */
-        void *getFrameData(const FrameType &type);
+
+        CacheData* getCacheData();
+
+
+        NodeData* getFrameData();
+
+        int refrashFrame(NodeData* node);
+
+
+        NodeData* requestFrame();
+
+        int realseFrame(NodeData* node);
 
     public:
         /**
@@ -162,7 +113,6 @@ namespace ArduCam
             return m_Infos.type;
         }
     };
-
 } // namespace Arducam
 
 #endif

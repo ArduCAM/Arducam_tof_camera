@@ -14,17 +14,9 @@
 #include <errno.h>
 #include <cstring>
 
+#include "ArduCamTOFUnity.hpp"
 namespace ArduCam
 {
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-#define ARDUCAM_TOF_SENSOR_BUFFER_COUNT 4
-
-#define ARDUCAM_TOF_SENSOR_CACHE_TIMEOUT 5000
-
-#define ARDUCAM_TOF_SENSOR_CACHE_BUFFER_COUNT 8
-
-#endif
     /**
      * @brief Direct operation class for camera
      * 

@@ -63,7 +63,7 @@ void onMouse(int event, int x, int y, int flags, void *param)
 int main()
 {
     ArduCam::ArduCamTOFCamera tof;
-    ArduCam::ArduCamTOFFrame *frame;
+    ArduCam::NodeData *frame;
     if (tof.initialize(ArduCam::DEPTH_TYPE)){
         std::cerr<<"initialization failed"<<std::endl;
         exit(-1);
@@ -88,8 +88,8 @@ int main()
         frame = tof.requestFrame(200);
         if (frame != nullptr)
         {
-            depth_ptr = (float *)frame->getFrameData(ArduCam::DEPTH_FRAME);
-            amplitude_ptr = (float *)frame->getFrameData(ArduCam::AMPLITUDE_FRAME);
+            depth_ptr = (float *)frame->getData(ArduCam::DEPTH_FRAME);
+            amplitude_ptr = (float *)frame->getData(ArduCam::AMPLITUDE_FRAME);
             getPreview(preview_ptr, depth_ptr, amplitude_ptr);
 
             cv::Mat result_frame(tofFormat.height, tofFormat.width, CV_8U, preview_ptr);

@@ -8,7 +8,7 @@
 int main()
 {
     ArduCam::ArduCamTOFCamera tof;
-    ArduCam::ArduCamTOFFrame *frame;
+    ArduCam::NodeData *frame;
     if (tof.initialize(ArduCam::RAW_TYPE)){
         std::cerr<<"initialization failed"<<std::endl;
         exit(-1);
@@ -30,7 +30,7 @@ int main()
         frame = tof.requestFrame(200);
         if (frame != nullptr)
         {
-             raw_ptr = (int16_t*)frame->getFrameData(ArduCam::RAW_FRAME);
+             raw_ptr = (int16_t*)frame->getData(ArduCam::RAW_FRAME);
              cv::Mat raw_frame(cols, rows, CV_16S, raw_ptr);
              raw_frame.convertTo(raw_frame,CV_32F);
              cv::imshow("preview", raw_frame);

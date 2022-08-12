@@ -64,7 +64,7 @@ int main()
 {
     ArduCam::ArduCamTOFCamera tof;
     ArduCam::ArduCamTOFFrame *frame;
-    if (tof.initialize(ArduCam::RAW_TYPE)){
+    if (tof.initialize(ArduCam::DEPTH_TYPE)){
         std::cerr<<"initialization failed"<<std::endl;
         exit(-1);
     }

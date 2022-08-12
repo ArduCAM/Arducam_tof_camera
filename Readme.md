@@ -65,11 +65,15 @@ You need to alter the camera configuration in your /boot/config.txt file.to add 
 ### example_cpp
 > Run in the build folder
 ```Shell
-  ./example_cpp/test_cpp
+  ./example_cpp/preview_depth
+  #OR
+  ./example_cpp/capture_raw
 ```
 ### example_python
 > Run in the example folder
 ```Shell
   cd ../example/example_python/
-  python test.py
+  python preview_depth.py
+  #or
+  python capture_raw.py
 ```

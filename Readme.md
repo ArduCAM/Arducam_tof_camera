@@ -66,8 +66,10 @@ You need to alter the camera configuration in your /boot/config.txt file.to add 
 > Run in the build folder
 ```Shell
   ./example_cpp/preview_depth
-  #OR
+  #or
   ./example_cpp/capture_raw
+    #or
+  ./example_cpp/preview_pointcloud
 ```
 ### example_python
 > Run in the example folder

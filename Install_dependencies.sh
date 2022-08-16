@@ -20,4 +20,16 @@ sudo apt-get install libopencv-dev -y
 sudo pip3 install opencv-python
 sudo pip3 install numpy --upgrade
 sudo ldconfig
-sudo reboot 
+echo "reboot now?(y/n):"
+read USER_INPUT
+case $USER_INPUT in
+'y'|'Y')
+    echo "reboot"
+    sudo reboot
+;;
+*)
+    echo "cancel"
+    echo "The script settings will only take effect after restarting, please restart yourself later."
+    exit -1
+;;
+esac

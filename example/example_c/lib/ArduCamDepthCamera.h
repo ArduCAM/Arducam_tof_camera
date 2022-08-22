@@ -122,12 +122,13 @@ extern "C"
 	/**
 	 * @brief Initialize the camera configuration and turn on the camera, set the initialization frame according to the @ref type.
 	 *
-	 * @param camera Camera instance, obtained through @ref createArducamDepthCamera()
-	 * @param type Type of camera output fame..
+	 * @param camera Camera instance, obtained through @ref createArducamDepthCamera().
+	 * @param type Type of camera output fame.
+	 * @param path Device node, the default value is video0.
 	 *
 	 * @return Return Status code.
 	 */
-	extern Status initialize(ArducamDepthCamera camera, OutputType type);
+	extern Status initialize(ArducamDepthCamera camera, OutputType type, char const* path);
 
 	// /**
 	//  * @brief Close camera.

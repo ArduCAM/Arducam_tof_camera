@@ -1,18 +1,13 @@
 #ifndef __TOF_CAMERA_H
 #define __TOF_CAMERA_H
 
-#include <unordered_map>
 #include <functional>
-#include <iostream>
-#include <memory>
-#include <string>
-#include <math.h>
+#include <cmath>
 #include <thread>
-#include <mutex>
-#include <map>
 
 #include "ArduCamTOFSensor.hpp"
 #include "ArduCamTOFFrame.hpp"
+#include "ArduCamTOFUnity.hpp"
 #include "Semaphore.hpp"
 namespace ArduCam
 {
@@ -23,27 +18,6 @@ namespace ArduCam
      */
     typedef std::function<void(std::string frame_type, void *frame_ptr)> DoneCallback;
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
-    /**
-     * @struct CameraInfo
-     * @brief Basic information of the camera module
-     */
-    struct CameraInfo
-    {
-        int cameraId;
-        std::string cameraPath;
-        FrameFormat frameInfos;
-        // std::string connecting;
-        unsigned int width;
-        unsigned int height;
-        unsigned long int imageSize;
-    };
-
-    typedef enum {
-    	RANGE,
-        EXPOSURE,
-    } CameraMode;
-
     /**
      * @brief Camera application layer class, used to manage the camera and process frame data
      *
@@ -65,9 +39,11 @@ namespace ArduCam
          *      This parameter can be one of the following values:
          *          @arg RAW_TYPE
          *          @arg DEPTH_TYPE
+     	 * @param path Device node, the default value is video0.
+         * 
          * @return Return Status code, The returned value can be: OK or ERROR(0 or -1).
          */
-        int initialize(OutputType type);
+        int initialize(OutputType type,char const *path="/dev/video0");
         /**
          * @brief Start the camera stream and start processing.
          *
@@ -98,7 +74,7 @@ namespace ArduCam
          *
          * @return Return Status code, The returned value can be: OK or ERROR(0 or -1).
          */
-        int setControl(CameraMode mode,int value);
+        int setControl(CameraMode mode, int value);
 
         /**
          * @brief Get the Camera frames format.
@@ -113,21 +89,21 @@ namespace ArduCam
          * @param timeout Timeout time, -1 means to wait all the time, 0 means immediate range, other values indicate the maximum waiting time, the unit is milliseconds.
          * @return ArduCamTOFFrame class address.
          */
-        ArduCamTOFFrame *requestFrame(int16_t timeout);
+        NodeData *requestFrame(int16_t timeout);
 
         /**
          * @brief Free the memory space of the frame
          *
          * @return Return Status code, The returned value can be: OK or ERROR(0 or -1).
          */
-        int releaseFrame(ArduCamTOFFrame *);
+        int releaseFrame(NodeData *frame);
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     private:
         CameraInfo m_Info;
 
-        std::shared_ptr<ArduCamTOFSensor> m_depthSensor;
+        std::unique_ptr<ArduCamTOFSensor> m_depthSensor;
 
-        std::shared_ptr<ArduCamTOFFrame> m_frame;
+        std::unique_ptr<ArduCamTOFFrame> m_frame;
 
         std::thread capture_thread_;
 
@@ -137,10 +113,10 @@ namespace ArduCam
 
         Semaphore sem_;
 
-        float f_mod = 75e6;       //! Camera light wave modulation frequency
+        float f_mod = 75e6; //! Camera light wave modulation frequency
 
-        const float c = 3e8;      //! speed of light
-    
+        const float c = 3e8; //! speed of light
+
         const float pi = M_PI; //! π
 
     private:
@@ -152,7 +128,7 @@ namespace ArduCam
 
         void getRawImages(uint8_t *cache_ptr, int16_t *raw_ptr);
 
-        int analysisFrame(ArduCamTOFFrame *frame);
+        int analysisFrame(uint8_t *cache_ptr, ArduCam::NodeData *frame);
 
         void captureThread();
 

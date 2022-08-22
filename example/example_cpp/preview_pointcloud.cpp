@@ -52,16 +52,19 @@ int main()
 {
     ArduCam::ArduCamTOFCamera tof;
     ArduCam::NodeData *frame;
-    if (tof.initialize(ArduCam::DEPTH_TYPE))
+    if (tof.initialize(ArduCam::DEPTH_TYPE)){
+        std::cerr<<"initialization failed"<<std::endl;
         exit(-1);
-    if (tof.start())
+    }
+    if (tof.start()){
+        std::cerr<<"Failed to start camera"<<std::endl;
         exit(-1);
+    }
     tof.setControl(ArduCam::RANGE,2);
-
     float *depth_ptr;
     float *amplitude_ptr;
-    uint8_t *preview_ptr = new uint8_t[180 * 240];
-    unsigned long int ponitsizes = 180 * 240;
+    uint8_t *preview_ptr = new uint8_t[43200];
+    unsigned long int ponitsizes = 43200;
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ptr(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ> &pcloud = *cloud_ptr;
 
@@ -93,15 +96,15 @@ int main()
             cv::imshow("preview", result_frame);
             pcloud.clear();
 
-            for (unsigned long int _row = 0; _row < ponitsizes; _row++)
+            for (unsigned long int _idx = 0; _idx < ponitsizes; _idx++)
             {
-                if (amplitude_ptr[_row] > 30)
+                if (amplitude_ptr[_idx] > 30)
                 {
                     float fx = 240 / (2 * tan(0.5 * M_PI * 64.3 / 180));
                     float fy = 180 / (2 * tan(0.5 * M_PI * 50.4 / 180));
-                    int vy = _row / 240;
-                    int ux = _row % 240;
-                    float zz = depth_ptr[_row]; // fmod(depth_ptr[_row] , 4);
+                    int vy = _idx / 240;
+                    int ux = _idx % 240;
+                    float zz = depth_ptr[_idx];
 
                     float x = (((240 - ux - 120)) / fx) * zz;
                     float y = ((180 - vy - 90) / fy) * zz;

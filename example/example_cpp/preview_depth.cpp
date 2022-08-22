@@ -25,7 +25,7 @@ void display_fps(void)
 void getPreview(uint8_t *preview_ptr, float *phase_image_ptr, float *amplitude_image_ptr)
 {
     auto len = 240 * 180;
-    for (size_t i = 0; i < len; i++)
+    for (auto i = 0; i < len; i++)
     {
         uint8_t mask = *(amplitude_image_ptr + i) > 30 ? 254 : 0;
         float depth = ((1 - (*(phase_image_ptr + i) / MAX_DISTANCE)) * 255);
@@ -73,8 +73,8 @@ int main()
         std::cerr<<"Failed to start camera"<<std::endl;
         exit(-1);
     }
-    //  Modify the range also to modify the MAX_DISTANCE value
-    // tof.setMode(ArduCam::RANGE,2);
+    //  Modify the range also to modify the MAX_DISTANCE
+    // tof.setControl(ArduCam::RANGE,2);
     ArduCam::FrameFormat tofFormat = tof.getFrameFormats();
 
     float *depth_ptr;

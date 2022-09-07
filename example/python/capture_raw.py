@@ -5,7 +5,7 @@ import ArduCamDepthCamera as ac
 
 if __name__ == "__main__":
     cam = ac.ArducamCamera()
-    if cam.initialize(ac.TOFOutput.RAW, "/dev/video0") != 0 :
+    if cam.init(ac.TOFConnect.USB,ac.TOFOutput.RAW,0) != 0 :
         print("initialization failed")
     if cam.start() != 0 :
         print("Failed to start camera")

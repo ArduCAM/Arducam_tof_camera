@@ -51,16 +51,18 @@ void getPreview(uint8_t *preview_ptr, float *depth_image_ptr, float *amplitude_i
 int main()
 {
     ArduCam::ArduCamTOFCamera tof;
-    ArduCam::NodeData *frame;
-    if (tof.initialize(ArduCam::DEPTH_TYPE)){
-        std::cerr<<"initialization failed"<<std::endl;
+    ArduCam::FrameBuffer *frame;
+    if (tof.init(ArduCam::USB, ArduCam::DEPTH_TYPE))
+    {
+        std::cerr << "initialization failed" << std::endl;
         exit(-1);
     }
-    if (tof.start()){
-        std::cerr<<"Failed to start camera"<<std::endl;
+    if (tof.start())
+    {
+        std::cerr << "Failed to start camera" << std::endl;
         exit(-1);
     }
-    tof.setControl(ArduCam::RANGE,2);
+    tof.setControl(ArduCam::RANGE, MAX_DISTANCE);
     float *depth_ptr;
     float *amplitude_ptr;
     uint8_t *preview_ptr = new uint8_t[43200];
@@ -143,7 +145,7 @@ int main()
             case 'd':
                 cnt++;
                 sprintf(buff, "sensor_%d.pcd", cnt);
-                pcl::io::savePCDFileASCII (buff, pcloud);
+                pcl::io::savePCDFileASCII(buff, pcloud);
                 std::cout << "save pcd!" << std::endl;
             }
         }

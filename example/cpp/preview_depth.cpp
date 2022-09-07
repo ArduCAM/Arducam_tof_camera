@@ -5,6 +5,7 @@
 #include <chrono>
 #include <iostream>
 
+// MAX_DISTANCE value modifiable  is 2 or 4
 #define MAX_DISTANCE 4
 
 void display_fps(void)
@@ -63,8 +64,8 @@ void onMouse(int event, int x, int y, int flags, void *param)
 int main()
 {
     ArduCam::ArduCamTOFCamera tof;
-    ArduCam::NodeData *frame;
-    if (tof.initialize(ArduCam::DEPTH_TYPE)){
+    ArduCam::FrameBuffer *frame;
+    if (tof.init(ArduCam::USB,ArduCam::DEPTH_TYPE)){
         std::cerr<<"initialization failed"<<std::endl;
         exit(-1);
     }
@@ -74,8 +75,8 @@ int main()
         exit(-1);
     }
     //  Modify the range also to modify the MAX_DISTANCE
-    // tof.setControl(ArduCam::RANGE,2);
-    ArduCam::FrameFormat tofFormat = tof.getFrameFormats();
+    // tof.setControl(ArduCam::RANGE,MAX_DISTANCE);
+    ArduCam::CameraInfo tofFormat = tof.getCameraInfo();
 
     float *depth_ptr;
     float *amplitude_ptr;

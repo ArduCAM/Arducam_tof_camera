@@ -36,12 +36,6 @@ You need to alter the camera configuration in your /boot/config.txt file.to add 
   dtoverlay=arducam,media-controller=0
 ```
 > To override the automatic camera detection, Bullseye users will also need to delete the entry camera_auto_detect=1 if present in the config.txt file. Your Raspberry Pi will need to be rebooted after editing this file
-### Jetson 
-```Shell
-  wget https://github.com/ArduCAM/MIPI_Camera/releases/download/v0.0.3/install_full.sh
-  chmod +x install_full.sh
-  ./install_full.sh -m arducam
-```
 ### c&cpp example
 #### project dependencies
 ```Shell

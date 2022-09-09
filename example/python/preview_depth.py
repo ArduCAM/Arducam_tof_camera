@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import ArduCamDepthCamera as ac
 
+dir(ac)
 def process_frame(depth_buf: np.ndarray, amplitude_buf: np.ndarray) -> np.ndarray:
         
     depth_buf = np.nan_to_num(depth_buf)
@@ -47,7 +48,7 @@ def on_mouse(event, x, y, flags, param):
 
 if __name__ == "__main__":
     cam = ac.ArducamCamera()
-    if cam.initialize(ac.TOFOutput.DEPTH, "/dev/video0") != 0 :
+    if cam.init(ac.TOFConnect.CSI,ac.TOFOutput.DEPTH,0) != 0 :
         print("initialization failed")
     if cam.start() != 0 :
         print("Failed to start camera")

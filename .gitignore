@@ -1,2 +1,5 @@
 build/
 .vscode/
+install/
+log/
+py_arducam/

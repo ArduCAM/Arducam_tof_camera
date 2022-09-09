@@ -8,8 +8,8 @@
 int main()
 {
     ArduCam::ArduCamTOFCamera tof;
-    ArduCam::NodeData *frame;
-    if (tof.initialize(ArduCam::RAW_TYPE)){
+    ArduCam::FrameBuffer *frame;
+    if (tof.init(ArduCam::CSI,ArduCam::RAW_TYPE)){
         std::cerr<<"initialization failed"<<std::endl;
         exit(-1);
     }
@@ -17,10 +17,9 @@ int main()
         std::cerr<<"Failed to start camera"<<std::endl;
         exit(-1);
     }
-    ArduCam::FrameFormat tofFormat = tof.getFrameFormats();
+    ArduCam::CameraInfo tofFormat = tof.getCameraInfo();
 
     int16_t *raw_ptr;
-    float *amplitude_ptr;
     int cols = tofFormat.height;
     int rows = tofFormat.width * 4;
     cv::namedWindow("preview", cv::WINDOW_AUTOSIZE);

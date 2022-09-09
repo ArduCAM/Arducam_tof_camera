@@ -65,7 +65,7 @@ int main()
 {
     ArduCam::ArduCamTOFCamera tof;
     ArduCam::FrameBuffer *frame;
-    if (tof.init(ArduCam::USB,ArduCam::DEPTH_TYPE)){
+    if (tof.init(ArduCam::CSI,ArduCam::DEPTH_TYPE)){
         std::cerr<<"initialization failed"<<std::endl;
         exit(-1);
     }

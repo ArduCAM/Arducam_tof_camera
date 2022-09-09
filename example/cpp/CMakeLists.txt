@@ -12,3 +12,6 @@ add_executable(capture_raw capture_raw.cpp )
 target_link_libraries( capture_raw ArducamDepthCamera  ${OpenCV_LIBS} )
 
 
+project(PreviewUSB)
+add_executable(preview_usb preview_by_usb.cpp )
+target_link_libraries( preview_usb ArducamDepthCamera  ${OpenCV_LIBS} )

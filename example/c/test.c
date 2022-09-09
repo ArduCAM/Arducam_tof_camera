@@ -18,7 +18,7 @@ int main()
 {
     ArducamDepthCamera tof = createArducamDepthCamera();
     FrameBuffer frame;
-    if (init(tof,USB,DEPTH_TYPE,0))
+    if (init(tof,CSI,DEPTH_TYPE,0))
         exit(-1);
     if (start(tof))
         exit(-1);

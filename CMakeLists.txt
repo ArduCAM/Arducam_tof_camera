@@ -7,3 +7,4 @@ project(TOFCameraExample)
 
 add_subdirectory(example)
 add_subdirectory(pcl_preview)
+add_subdirectory(jetson)

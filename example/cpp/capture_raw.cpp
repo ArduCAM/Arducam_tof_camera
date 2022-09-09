@@ -9,7 +9,7 @@ int main()
 {
     ArduCam::ArduCamTOFCamera tof;
     ArduCam::FrameBuffer *frame;
-    if (tof.init(ArduCam::USB,ArduCam::RAW_TYPE)){
+    if (tof.init(ArduCam::CSI,ArduCam::RAW_TYPE)){
         std::cerr<<"initialization failed"<<std::endl;
         exit(-1);
     }

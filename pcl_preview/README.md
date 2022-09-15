@@ -1,6 +1,8 @@
 ## ArduCam Depth Camera 
 ### Run the example in the pcl_preview folder
-> Please refer to the instructions above for  _*a. Driver Install*_ ' and camera _*b.Configuration*_
+> Please refer to the instructions above for  _*a. Driver Install*_ , _*b.Configuration*_ and _*c.SDK install*_ whice run on RaspberryPi
+
+> Please refer to the instructions above for  _*project dependencies*_ and _*SDK install*_ whice run on Jetson
 #### project dependencies
 ```Shell
   sudo apt update

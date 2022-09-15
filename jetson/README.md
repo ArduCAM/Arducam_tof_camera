@@ -1,12 +1,5 @@
-## ArduCam Depth Camera by Jetson
-### Run project 
-#### SDK install
-```Shell
-  curl -s --compressed "https://arducam.github.io/arducam_ppa/KEY.gpg" | sudo apt-key add -
-  sudo curl -s --compressed -o /etc/apt/sources.list.d/arducam_list_files.list "https://arducam.github.io/arducam_ppa/arducam_list_files.list"
-  sudo apt update
-  sudo apt install arducam-config-parser-dev arducam-usb-sdk-dev arducam-tof-sdk-dev
-```
+## ArduCam Depth Camera
+### Run project on Jetson
 ### Driver install 
 ```Shell
   wget https://github.com/ArduCAM/MIPI_Camera/releases/download/v0.0.3/install_full.sh
@@ -21,13 +14,24 @@
   ./compile_nx.sh
 ```
 > You can also manually install and compile according to the following steps
-### c&cpp example
+### example
 #### project dependencies
-> The project depends on opencv
 ```Shell
   sudo apt-get update
-  sudo apt-get install build-essential
-  sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev 
+  sudo apt-get install build-essential 
+  sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev  nvidia-opencv
+```
+> The project depends on opencv,If it is not installed, please install it manually.
+```Shell
+  sudo apt-get update
+  sudo apt-get nvidia-opencv
+```
+#### SDK install
+```Shell
+  curl -s --compressed "https://arducam.github.io/arducam_ppa/KEY.gpg" | sudo apt-key add -
+  sudo curl -s --compressed -o /etc/apt/sources.list.d/arducam_list_files.list "https://arducam.github.io/arducam_ppa/arducam_list_files.list"
+  sudo apt update
+  sudo apt install arducam-config-parser-dev arducam-usb-sdk-dev arducam-tof-sdk-dev
 ```
 ##### Compilation
 ```Shell

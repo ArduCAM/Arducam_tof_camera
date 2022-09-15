@@ -1,15 +1,17 @@
 sudo apt-get update
-sudo apt-get install cmake -y
-sudo apt-get install libjpeg-dev -y
-sudo apt-get install libatlas-base-dev -y
-sudo apt-get install libjpeg-dev -y
-sudo apt-get install libtiff5-dev -y
-sudo apt-get install li.jpg12-dev -y
-sudo apt-get install libqtgui4 libqt4-test -y
-sudo apt-get install libjasper-dev -y
+sudo apt-get install cmake curl -y
+sudo apt install -y  nvidia-opencv
+
+curl -s --compressed "https://arducam.github.io/arducam_ppa/KEY.gpg" | sudo apt-key add -
+sudo curl -s --compressed -o /etc/apt/sources.list.d/arducam_list_files.list "https://arducam.github.io/arducam_ppa/arducam_list_files.list"
+sudo apt update
+sudo apt install arducam-config-parser-dev arducam-usb-sdk-dev arducam-tof-sdk-dev
+
 # compile
 cd `find ~ -name Arducam_tof_camera`
+cd `find . -name jetson`
+
 mkdir build && cd build
 cmake ..
 make 
-./jetson/nano_preview 
+./nano_preview 

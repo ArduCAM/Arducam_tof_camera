@@ -40,8 +40,7 @@ You need to alter the camera configuration in your /boot/config.txt file.to add 
 #### project dependencies
 ```Shell
   sudo apt-get update
-  sudo apt-get install build-essential
-  sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev 
+  sudo apt-get install build-essential cmake 
   sudo apt-get install libopencv-dev
 ```
 ##### Compilation
@@ -66,61 +65,3 @@ You need to alter the camera configuration in your /boot/config.txt file.to add 
     #or
   ./cpp/preview_pointcloud
 ```
-### python example
-#### project dependencies
-```Shell
-  sudo apt update
-  sudo pip3 install opencv-python
-  sudo pip3 install numpy --upgrade
-```
-#### example_python
-> Run in the example folder
-```Shell
-  cd ../example/example_python/
-  python preview_depth.py
-  #or
-  python capture_raw.py
-```
-### Run the example in the pcl_preview folder
-> Please refer to the instructions above for  _*a. Driver Install*_ ' and camera _*b.Configuration*_
-#### project dependencies
-```Shell
-  sudo apt update
-  sudo apt install cmake libpcl-dev
-```
-#### Compilation
-```Shell
-  cd Arducam_tof_camera/pcl_preview
-  mkdir build && cd build
-  cmake ..
-  make
-```
-#### Run
-> Run in the pcl_preview/build folder
-```Shell
-  ./preview_pointcloud
-```
-### Run the example in the ros2_publisher folder
-> Please refer to the instructions above for  _*a. Driver Install*_ ' and camera _*b.Configuration*_
-#### Ros2 install
-The example is based on ros2, please refer to [ros2 installation](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html) and install it yourself
-
-```Shell
-# Install the compilation tool colcon
-sudo apt install python3-colcon-common-extensions
-# Environment variable configuration,Take the humble version as an example
-echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc 
-echo "export ROS_DOMAIN_ID=7" >> ~/.bashrc 
-source ~/.bashrc 
-```
-#### Compilation
-```Shell
-  cd Arducam_tof_camera/ros2_publisher
-  colcon build --merge-install
-```
-#### Run
-```Shell
-  . install/setup.bash 
-  ros2 run arducam tof_pointcl
-```
->You can preview by running rviz2 on the host in the LAN

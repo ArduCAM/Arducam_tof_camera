@@ -50,9 +50,17 @@ void getPreview(uint8_t *preview_ptr, float *depth_image_ptr, float *amplitude_i
 
 int main()
 {
-    ArduCam::ArduCamTOFCamera tof;
+    #ifdef __JETSON_NANO__
+        ArduCam::ArduCamTOFCamera tof(ArduCam::Jetson_Nano);
+    #endif
+    #ifdef __JETSON_NX__
+        ArduCam::ArduCamTOFCamera tof(ArduCam::Jetson_NX);
+    #endif
+    #ifdef __DEFAULT__
+        ArduCam::ArduCamTOFCamera tof;
+    #endif
     ArduCam::FrameBuffer *frame;
-    if (tof.init(ArduCam::USB, ArduCam::DEPTH_TYPE))
+    if (tof.init(ArduCam::CSI, ArduCam::DEPTH_TYPE))
     {
         std::cerr << "initialization failed" << std::endl;
         exit(-1);
@@ -76,7 +84,7 @@ int main()
     pcloud.is_dense = true;
     vtkObject::GlobalWarningDisplayOff();
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer = simpleVis(cloud_ptr);
-    boost::thread vthread(&viewerRunner, viewer);
+    // boost::thread vthread(&viewerRunner, viewer);
     int cnt = 0;
     char buff[60];
 
@@ -108,8 +116,8 @@ int main()
                     int ux = _idx % 240;
                     float zz = depth_ptr[_idx];
 
-                    float x = (((240 - ux - 120)) / fx) * zz;
-                    float y = ((180 - vy - 90) / fy) * zz;
+                    float x = (((120 - ux)) / fx) * zz;
+                    float y = ((90 - vy) / fy) * zz;
                     float z = zz;
                     pcl::PointXYZ ptemp(x, y, z);
                     pcloud.points.push_back(ptemp);
@@ -126,6 +134,7 @@ int main()
             boost::mutex::scoped_lock updateLock(updateModelMutex);
             viewer->updatePointCloud<pcl::PointXYZ>(cloud_ptr, "sample cloud");
             updateLock.unlock();
+            viewer->spinOnce(100);
             boost::this_thread::sleep(boost::posix_time::microseconds(100));
             switch (cv::waitKey(1))
             {
@@ -138,7 +147,7 @@ int main()
             case 'q':
                 cv::destroyAllWindows();
                 viewer->close();
-                vthread.join();
+                // vthread.join();
                 tof.stop();
                 exit(0);
                 break;

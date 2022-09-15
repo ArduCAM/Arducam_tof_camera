@@ -9,7 +9,9 @@ sudo apt install arducam-config-parser-dev arducam-usb-sdk-dev arducam-tof-sdk-d
 
 # compile
 cd `find ~ -name Arducam_tof_camera`
+cd `find . -name jetson`
+
 mkdir build && cd build
 cmake ..
 make 
-./jetson/nx_preview 
+./nx_preview 

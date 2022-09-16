@@ -18,8 +18,7 @@
 #### project dependencies
 ```Shell
   sudo apt-get update
-  sudo apt-get install build-essential 
-  sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev  nvidia-opencv
+  sudo apt-get install build-essential cmake
 ```
 > The project depends on opencv,If it is not installed, please install it manually.
 ```Shell
@@ -35,7 +34,7 @@
 ```
 ##### Compilation
 ```Shell
-  cd Arducam_tof_camera/example
+  cd Arducam_tof_camera
   mkdir build && cd build
   cmake ..
   make

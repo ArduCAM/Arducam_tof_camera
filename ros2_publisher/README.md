@@ -29,7 +29,12 @@ source ~/.bashrc
 #### Compilation
 ```Shell
   cd Arducam_tof_camera/ros2_publisher
-  colcon build --merge-install
+    # If the platform running the program is Jetson nano
+  colcon build --merge-install --cmake-args -DPLATFORM:STRING=NANO
+  # Else if the platform running the program is Jetson NX
+  colcon build --merge-install --cmake-args -DPLATFORM:STRING=NX
+  # Else
+  colcon build --merge-install --cmake-args -DPLATFORM:STRING=DEFAULT
 ```
 #### Run
 ```Shell

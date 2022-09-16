@@ -17,7 +17,7 @@
   # If the platform running the program is Jetson nano
   cmake -DPLATFORM:STRING=NANO ..
   # Else if the platform running the program is Jetson NX
-  cmake -DPLATFORM:STRING=NANO ..
+  cmake -DPLATFORM:STRING=NX ..
   # Else
   cmake -DPLATFORM:STRING=DEFAULT ..
 

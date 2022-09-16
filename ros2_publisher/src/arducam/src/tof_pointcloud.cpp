@@ -11,7 +11,15 @@
 
 using namespace std::chrono_literals;
 
-ArduCam::ArduCamTOFCamera tof;
+#ifdef __JETSON_NANO__
+    ArduCam::ArduCamTOFCamera tof(ArduCam::Jetson_Nano);
+#endif
+#ifdef __JETSON_NX__
+    ArduCam::ArduCamTOFCamera tof(ArduCam::Jetson_NX);
+#endif
+#ifdef __DEFAULT__
+    ArduCam::ArduCamTOFCamera tof;
+#endif
 
 class TOFPublisher : public rclcpp::Node
 {
@@ -100,7 +108,7 @@ private:
 int main(int argc, char *argv[])
 {
     rclcpp::init(argc, argv);
-    if (tof.init(ArduCam::USB,ArduCam::DEPTH_TYPE))
+    if (tof.init(ArduCam::CSI,ArduCam::DEPTH_TYPE))
     {
         printf("initialize fail\n");
         exit(-1);

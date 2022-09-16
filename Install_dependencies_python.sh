@@ -9,15 +9,19 @@ sudo sed -i "s/\(^dtoverlay=*\)/#\1/" /boot/config.txt
 sudo bash -c 'echo dtoverlay=vc4-fkms-v3d >> /boot/config.txt'
 sudo bash -c 'echo dtoverlay=arducam,media-controller=0 >> /boot/config.txt'
 
-curl -s --compressed "https://arducam.github.io/arducam_ppa/KEY.gpg" | sudo apt-key add -
-sudo curl -s --compressed -o /etc/apt/sources.list.d/arducam_list_files.list "https://arducam.github.io/arducam_ppa/arducam_list_files.list"
 sudo apt update
-sudo apt install arducam-config-parser-dev arducam-usb-sdk-dev arducam-tof-sdk-dev
-
-# install dependency
-sudo apt-get update
-sudo apt-get install cmake -y
 sudo apt install libopencv-dev -y
+sudo apt-get -y install libcblas-dev
+sudo apt-get -y install libhdf5-dev
+sudo apt-get -y install libhdf5-serial-dev
+sudo apt-get -y install libatlas-base-dev
+sudo apt-get -y install libjasper-dev 
+sudo apt-get -y install libqtgui4 
+sudo apt-get -y install libqt4-test
+
+sudo pip3 install opencv-python ArduCamDepthCamera
+sudo pip3 numpy --upgrade
+
 echo "reboot now?(y/n):"
 read USER_INPUT
 case $USER_INPUT in

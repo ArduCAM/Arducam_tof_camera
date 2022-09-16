@@ -9,6 +9,19 @@ sudo sed -i "s/\(^dtoverlay=*\)/#\1/" /boot/config.txt
 sudo bash -c 'echo dtoverlay=vc4-fkms-v3d >> /boot/config.txt'
 sudo bash -c 'echo dtoverlay=arducam,media-controller=0 >> /boot/config.txt'
 
+sudo apt update
+sudo apt install libopencv-dev -y
+sudo apt-get -y install libcblas-dev
+sudo apt-get -y install libhdf5-dev
+sudo apt-get -y install libhdf5-serial-dev
+sudo apt-get -y install libatlas-base-dev
+sudo apt-get -y install libjasper-dev 
+sudo apt-get -y install libqtgui4 
+sudo apt-get -y install libqt4-test
+
+sudo pip3 install opencv-python ArduCamDepthCamera
+sudo pip3 numpy --upgrade
+
 echo "reboot now?(y/n):"
 read USER_INPUT
 case $USER_INPUT in

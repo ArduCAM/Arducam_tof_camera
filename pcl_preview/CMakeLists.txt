@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.4)
 project(PreviewPointcloud)
 find_package(PCL QUIET)
+include_directories(BEFORE /usr/include/c  /usr/include/cpp)
 
 if(PCL_FOUND)
     if(PLATFORM STREQUAL "NANO")

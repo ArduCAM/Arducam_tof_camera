@@ -5,6 +5,8 @@
 #include <chrono>
 #include <iostream>
 
+#define MAX_DISTANCE 4
+
 int main()
 {
     ArduCam::ArduCamTOFCamera tof;
@@ -17,6 +19,8 @@ int main()
         std::cerr<<"Failed to start camera"<<std::endl;
         exit(-1);
     }
+    //  Modify the range also to modify the MAX_DISTANCE
+    tof.setControl(ArduCam::RANGE,MAX_DISTANCE);
     ArduCam::CameraInfo tofFormat = tof.getCameraInfo();
 
     int16_t *raw_ptr;

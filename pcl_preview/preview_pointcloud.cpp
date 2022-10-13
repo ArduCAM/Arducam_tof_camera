@@ -9,10 +9,10 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
-
+#include <ctime>
 #include "ArduCamTOFCamera.hpp"
 
-#define MAX_DISTANCE 2
+#define MAX_DISTANCE 4
 
 boost::mutex updateModelMutex;
 
@@ -60,6 +60,8 @@ int main()
         ArduCam::ArduCamTOFCamera tof;
     #endif
     ArduCam::FrameBuffer *frame;
+    std::time_t t;
+    tm *nowtime;
     if (tof.init(ArduCam::CSI, ArduCam::DEPTH_TYPE))
     {
         std::cerr << "initialization failed" << std::endl;
@@ -74,7 +76,6 @@ int main()
     float *depth_ptr;
     float *amplitude_ptr;
     uint8_t *preview_ptr = new uint8_t[43200];
-    unsigned long int ponitsizes = 43200;
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ptr(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ> &pcloud = *cloud_ptr;
 
@@ -85,9 +86,9 @@ int main()
     vtkObject::GlobalWarningDisplayOff();
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer = simpleVis(cloud_ptr);
     // boost::thread vthread(&viewerRunner, viewer);
-    int cnt = 0;
     char buff[60];
-
+    const float fx = 240 / (2 * tan(0.5 * M_PI * 64.3 / 180));
+    const float fy = 180 / (2 * tan(0.5 * M_PI * 50.4 / 180));
     for (;;)
     {
         frame = tof.requestFrame(200);
@@ -102,24 +103,21 @@ int main()
 
             cv::applyColorMap(result_frame, result_frame, cv::COLORMAP_JET);
 
-            cv::resize(result_frame, result_frame, cv::Size(960, 720));
+            cv::resize(result_frame, result_frame, cv::Size(720, 540));
             cv::imshow("preview", result_frame);
             pcloud.clear();
 
-            for (unsigned long int _idx = 0; _idx < ponitsizes; _idx++)
+            unsigned long int pos = 0;
+            for (int row_idx = 0; row_idx < 180; row_idx++)
+                for (int col_idx = 0; col_idx < 180; col_idx++,pos++)
             {
-                if (amplitude_ptr[_idx] > 30)
+                if (amplitude_ptr[pos] > 30)
                 {
-                    float fx = 240 / (2 * tan(0.5 * M_PI * 64.3 / 180));
-                    float fy = 180 / (2 * tan(0.5 * M_PI * 50.4 / 180));
-                    int vy = _idx / 240;
-                    int ux = _idx % 240;
-                    float zz = depth_ptr[_idx];
+                    float zz = depth_ptr[pos];
 
-                    float x = (((120 - ux)) / fx) * zz;
-                    float y = ((90 - vy) / fy) * zz;
-                    float z = zz;
-                    pcl::PointXYZ ptemp(x, y, z);
+                    float xx = (((120 - col_idx)) / fx) * zz;
+                    float yy = ((90 - row_idx) / fy) * zz;
+                    pcl::PointXYZ ptemp(xx, yy, zz);
                     pcloud.points.push_back(ptemp);
                 }
                 else
@@ -136,11 +134,13 @@ int main()
             updateLock.unlock();
             viewer->spinOnce(100);
             boost::this_thread::sleep(boost::posix_time::microseconds(100));
+
             switch (cv::waitKey(1))
             {
             case 's':
-                cnt++;
-                sprintf(buff, "image_%d.png", cnt);
+                t = std::time(0);
+                nowtime = localtime(&t);
+                sprintf(buff, "image_%d%d%d%d%d%d.png", 1900 + nowtime->tm_year, nowtime->tm_mon + 1,nowtime->tm_mday,nowtime->tm_hour + 1,nowtime->tm_min + 1,nowtime->tm_sec + 1);
                 cv::imwrite(buff, result_frame);
                 std::cout << "save image!" << std::endl;
                 break;
@@ -152,8 +152,9 @@ int main()
                 exit(0);
                 break;
             case 'd':
-                cnt++;
-                sprintf(buff, "sensor_%d.pcd", cnt);
+                t = std::time(0);
+                nowtime = localtime(&t);
+                sprintf(buff, "sensor_%d%d%d%d%d%d.pcd", 1900 + nowtime->tm_year, nowtime->tm_mon + 1,nowtime->tm_mday,nowtime->tm_hour + 1,nowtime->tm_min + 1,nowtime->tm_sec + 1);
                 pcl::io::savePCDFileASCII(buff, pcloud);
                 std::cout << "save pcd!" << std::endl;
             }

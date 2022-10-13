@@ -75,7 +75,7 @@ int main()
         exit(-1);
     }
     //  Modify the range also to modify the MAX_DISTANCE
-    // tof.setControl(ArduCam::RANGE,MAX_DISTANCE);
+    tof.setControl(ArduCam::RANGE,MAX_DISTANCE);
     ArduCam::CameraInfo tofFormat = tof.getCameraInfo();
 
     float *depth_ptr;
@@ -98,14 +98,8 @@ int main()
             cv::Mat amplitude_frame(tofFormat.height, tofFormat.width, CV_32F, amplitude_ptr);
 
             cv::applyColorMap(result_frame, result_frame, cv::COLORMAP_JET);
-
-            amplitude_frame.forEach<float>([](float &p, const int *position) -> void
-                                           {   
-                if(p < 0) p=0;
-                else if(p > 255) p=255; });
-            amplitude_frame.convertTo(amplitude_frame, CV_8U);
+            amplitude_frame.convertTo(amplitude_frame, CV_8U,255.0/1024,0);
             cv::imshow("amplitude", amplitude_frame);
-
             cv::rectangle(result_frame, seletRect, cv::Scalar(0, 0, 0), 2);
             cv::rectangle(result_frame, followRect, cv::Scalar(255, 255, 255), 1);
 

@@ -57,25 +57,25 @@ private:
         depth_frame.clear();
         float *depth_ptr = (float *)frame->getData(ArduCam::DEPTH_FRAME);
         float *amplitude_ptr = (float *)frame->getData(ArduCam::AMPLITUDE_FRAME);
-        int sub = 0;
-        for (int vy = 0; vy < 180; vy++)
-            for (int ux = 0; ux < 240; ux++, sub++)
+        unsigned long int pos = 0;
+        for (int row_idx = 0; row_idx < 180; row_idx++)
+            for (int col_idx = 0; col_idx < 240; col_idx++, pos++)
             {
-                if (amplitude_ptr[sub] > 30)
+                if (amplitude_ptr[pos] > 30)
                 {
-                    float zz = depth_ptr[sub]; // fmod(depth_ptr[_row] , 4);
-                    pc2_msg_->points[sub].x = (((240 - ux - 120)) / fx) * zz;
-                    pc2_msg_->points[sub].y = ((180 - vy - 90) / fy) * zz;
-                    pc2_msg_->points[sub].z = zz;
-                    pc2_msg_->channels[0].values[sub] = depth_ptr[sub];
-                    depth_frame.push_back(depth_ptr[sub]);
+                    float zz = depth_ptr[pos]; 
+                    pc2_msg_->points[pos].x = (((120 - col_idx)) / fx) * zz;
+                    pc2_msg_->points[pos].y = ((90 - row_idx) / fy) * zz;
+                    pc2_msg_->points[pos].z = zz;
+                    pc2_msg_->channels[0].values[pos] = depth_ptr[pos];
+                    depth_frame.push_back(depth_ptr[pos]);
                 }
                 else
                 {
-                    pc2_msg_->points[sub].x = 0;
-                    pc2_msg_->points[sub].y = 0;
-                    pc2_msg_->points[sub].z = 0;
-                    pc2_msg_->channels[0].values[sub] = 0;
+                    pc2_msg_->points[pos].x = 0;
+                    pc2_msg_->points[pos].y = 0;
+                    pc2_msg_->points[pos].z = 0;
+                    pc2_msg_->channels[0].values[pos] = 0;
                     depth_frame.push_back(0);
                 }
             }
@@ -119,6 +119,8 @@ int main(int argc, char *argv[])
         printf("start fail\n");
         exit(-1);
     }
+    tof.setControl(ArduCam::RANGE,4);
+
     printf("pointcloud publisher start\n");
 
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);

@@ -6,7 +6,7 @@
 >The example is based on ros2,We found the installation script on github, you can install it as follows, or you can install it yourself. author : [Ar-Ray](https://github.com/Ar-Ray-code/rpi-bullseye-ros2)
 ```Shell
 # default : (humble, arm7l)
-curl -s https://raw.githubusercontent.com/Ar-Ray-code/rpi-bullseye-ros2/main/install.bash | bash
+curl -s https://raw.githubusercontent.com/v1ster/rpi-bullseye-ros2/main/install.bash | bash
 ```
 
 ```Shell

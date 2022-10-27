@@ -3,7 +3,7 @@
 #### Install dependencies
 > Run in the Arducam_tof_camera/jetson folder
 ```Shell
-  ./Install_dependencies.sh
+  ./Install_dependecies_jetson.sh
 ```
 ### Compile && Run
 > Run in the Arducam_tof_camera/jetson folder
@@ -11,8 +11,7 @@
   ./compile.sh
 ```
 > You can also manually install and compile according to the following steps
-### example
-### Driver install 
+#### Driver install 
 ```Shell
   wget https://github.com/ArduCAM/MIPI_Camera/releases/download/v0.0.3/install_full.sh
   chmod +x install_full.sh
@@ -42,8 +41,7 @@
   cmake ..
   make
 ```
-### Start
-#### cpp example
+#### Start Jetson Preview
 > Run in the example/build folder
 ```Shell
   ./jetson/jetson_preview 

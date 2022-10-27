@@ -11,15 +11,8 @@
 
 using namespace std::chrono_literals;
 
-#ifdef __JETSON_NANO__
-    ArduCam::ArduCamTOFCamera tof(ArduCam::Jetson_Nano);
-#endif
-#ifdef __JETSON_NX__
-    ArduCam::ArduCamTOFCamera tof(ArduCam::Jetson_NX);
-#endif
-#ifdef __DEFAULT__
-    ArduCam::ArduCamTOFCamera tof;
-#endif
+
+ArduCam::ArduCamTOFCamera tof;
 
 class TOFPublisher : public rclcpp::Node
 {

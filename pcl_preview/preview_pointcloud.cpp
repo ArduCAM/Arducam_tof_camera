@@ -50,15 +50,8 @@ void getPreview(uint8_t *preview_ptr, float *depth_image_ptr, float *amplitude_i
 
 int main()
 {
-    #ifdef __JETSON_NANO__
-        ArduCam::ArduCamTOFCamera tof(ArduCam::Jetson_Nano);
-    #endif
-    #ifdef __JETSON_NX__
-        ArduCam::ArduCamTOFCamera tof(ArduCam::Jetson_NX);
-    #endif
-    #ifdef __DEFAULT__
-        ArduCam::ArduCamTOFCamera tof;
-    #endif
+
+    ArduCam::ArduCamTOFCamera tof;
     ArduCam::FrameBuffer *frame;
     std::time_t t;
     tm *nowtime;

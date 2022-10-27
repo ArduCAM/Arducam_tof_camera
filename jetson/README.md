@@ -1,20 +1,23 @@
 ## ArduCam Depth Camera
 ### Run project on Jetson
+#### Install dependencies
+> Run in the Arducam_tof_camera/jetson folder
+```Shell
+  ./Install_dependencies.sh
+```
+### Compile && Run
+> Run in the Arducam_tof_camera/jetson folder
+```Shell
+  ./compile.sh
+```
+> You can also manually install and compile according to the following steps
+### example
 ### Driver install 
 ```Shell
   wget https://github.com/ArduCAM/MIPI_Camera/releases/download/v0.0.3/install_full.sh
   chmod +x install_full.sh
   ./install_full.sh -m arducam
 ```
-### Compile && Run
-> Run in the Arducam_tof_camera folder
-```Shell
-  ./compile_nano.sh
-  # or
-  ./compile_nx.sh
-```
-> You can also manually install and compile according to the following steps
-### example
 #### project dependencies
 ```Shell
   sudo apt-get update
@@ -43,7 +46,5 @@
 #### cpp example
 > Run in the example/build folder
 ```Shell
-  ./jetson/nx_preview   
-  #or
-  ./jetson/nano_preview   
+  ./jetson/jetson_preview 
 ```

@@ -6,7 +6,7 @@
 >The example is based on ros2,We found the installation script on github, you can install it as follows, or you can install it yourself. author : [Ar-Ray](https://github.com/Ar-Ray-code/rpi-bullseye-ros2)
 ```Shell
 # default : (humble, arm7l)
-curl -s https://raw.githubusercontent.com/Ar-Ray-code/rpi-bullseye-ros2/main/install.bash | bash
+curl -s https://raw.githubusercontent.com/v1ster/rpi-bullseye-ros2/main/install.bash | bash
 ```
 
 ```Shell
@@ -29,12 +29,7 @@ source ~/.bashrc
 #### Compilation
 ```Shell
   cd Arducam_tof_camera/ros2_publisher
-    # If the platform running the program is Jetson nano
-  colcon build --merge-install --cmake-args -DPLATFORM:STRING=NANO
-  # Else if the platform running the program is Jetson NX
-  colcon build --merge-install --cmake-args -DPLATFORM:STRING=NX
-  # Else
-  colcon build --merge-install --cmake-args -DPLATFORM:STRING=DEFAULT
+  colcon build --merge-install 
 ```
 #### Run
 ```Shell

@@ -7,11 +7,6 @@ sudo curl -s --compressed -o /etc/apt/sources.list.d/arducam_list_files.list "ht
 sudo apt update
 sudo apt install arducam-config-parser-dev arducam-usb-sdk-dev arducam-tof-sdk-dev
 
-# compile
-cd `find ~ -name Arducam_tof_camera`
-cd `find . -name jetson`
-
-mkdir build && cd build
-cmake ..
-make 
-./nx_preview 
+wget https://github.com/ArduCAM/MIPI_Camera/releases/download/v0.0.3/install_full.sh
+chmod +x install_full.sh
+./install_full.sh -m arducam

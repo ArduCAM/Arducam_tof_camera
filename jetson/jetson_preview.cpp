@@ -37,7 +37,7 @@ void getPreview(uint8_t *preview_ptr, float *phase_image_ptr, float *amplitude_i
 
 int main()
 {
-    ArduCam::ArduCamTOFCamera tof(ArduCam::Jetson_Nano);
+    ArduCam::ArduCamTOFCamera tof;
     ArduCam::FrameBuffer *frame;
     if (tof.init(ArduCam::CSI,ArduCam::DEPTH_TYPE)){
         std::cerr<<"initialization failed"<<std::endl;

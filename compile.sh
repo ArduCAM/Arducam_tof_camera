@@ -1,8 +1,25 @@
-# compile
-cd `find ~ -name Arducam_tof_camera`
-cd `find -name example`
+#!/bin/sh
+# compile script
+workpath=${PWD##*/}
+execfunc=cpp/preview_depth
+if [ ! "$workpath" = "Arducam_tof_camera" ] && [ ! "$workpath" = "arducam_tof_camera" ] ; then
+  echo "The compiled script is moved and cannot be executed normally!"
+else
+  if [ ! -d "example" ]; then
+    echo "source code file does not exist!"
+  else
+    cd example || exit
 
-mkdir build && cd build
-cmake ..
-make 
-./cpp/preview_depth
+    if [ ! -d "build" ]; then
+      mkdir build
+    fi
+
+    cd build || exit
+    cmake .. && make
+    if [ ! -x "$execfunc" ]; then
+      echo "Compilation error, please check whether /dev/video0 exists, or check whether the driver and sdk are installed successfully!"
+    else
+      $execfunc
+    fi
+  fi
+fi

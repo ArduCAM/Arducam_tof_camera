@@ -1,9 +1,22 @@
+#!/bin/sh
+# compile script
+# echo $(dirname $(pwd))
+workpath=${PWD##*/}
+execfunc=./jetson_preview
 
-# compile
-cd `find ~ -name Arducam_tof_camera`
-cd jetson
+if [ ! "$workpath" = "jetson" ]; then
+  echo "The compiled script is moved and cannot be executed normally!"
+else
+   
+  if [ ! -d "build" ]; then
+    mkdir build
+  fi
 
-mkdir build && cd build
-cmake ..
-make 
-./jetson_preview 
+  cd build || exit
+  cmake .. && make
+  if [ ! -x "$execfunc" ];then
+    echo "Compilation error, please check whether /dev/video0 exists, or check whether the driver and sdk are installed successfully!"
+  else
+    $execfunc
+  fi
+fi

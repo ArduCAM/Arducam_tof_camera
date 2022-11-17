@@ -39,17 +39,19 @@ int main()
 {
     ArduCam::ArduCamTOFCamera tof;
     ArduCam::FrameBuffer *frame;
-    if (tof.init(ArduCam::USB,ArduCam::DEPTH_TYPE)){
-        std::cerr<<"initialization failed"<<std::endl;
+    if (tof.init(ArduCam::USB, ArduCam::DEPTH_TYPE))
+    {
+        std::cerr << "initialization failed" << std::endl;
         exit(-1);
     }
 
-    if (tof.start()){
-        std::cerr<<"Failed to start camera"<<std::endl;
+    if (tof.start())
+    {
+        std::cerr << "Failed to start camera" << std::endl;
         exit(-1);
     }
     //  Modify the range also to modify the MAX_DISTANCE
-    // tof.setControl(ArduCam::RANGE,MAX_DISTANCE);
+    tof.setControl(ArduCam::RANGE, MAX_DISTANCE);
     ArduCam::CameraInfo tofFormat = tof.getCameraInfo();
 
     float *depth_ptr;
@@ -72,13 +74,8 @@ int main()
 
             cv::applyColorMap(result_frame, result_frame, cv::COLORMAP_JET);
 
-            amplitude_frame.forEach<float>([](float &p, const int *position) -> void
-                                           {   
-                if(p < 0) p=0;
-                else if(p > 255) p=255; });
-            amplitude_frame.convertTo(amplitude_frame, CV_8U);
+            amplitude_frame.convertTo(amplitude_frame, CV_8U, 255.0 / 1024, 0);
             cv::imshow("amplitude", amplitude_frame);
-
             cv::imshow("preview", result_frame);
 
             if (cv::waitKey(1) == 27)

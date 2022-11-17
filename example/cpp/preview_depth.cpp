@@ -23,6 +23,19 @@ void display_fps(void)
     }
 }
 
+cv::Mat matRotateClockWise180(cv::Mat src)
+{
+    if (src.empty())
+    {
+        std::cerr << "RorateMat src is empty!";
+        return;
+    }
+
+    flip(src, src, 0);
+    flip(src, src, 1);
+    return src;
+}
+
 void getPreview(uint8_t *preview_ptr, float *phase_image_ptr, float *amplitude_image_ptr)
 {
     auto len = 240 * 180;
@@ -34,8 +47,10 @@ void getPreview(uint8_t *preview_ptr, float *phase_image_ptr, float *amplitude_i
         *(preview_ptr + i) = pixel & mask;
     }
 }
+
 cv::Rect seletRect(0, 0, 0, 0);
 cv::Rect followRect(0, 0, 0, 0);
+
 void onMouse(int event, int x, int y, int flags, void *param)
 {
     if (x < 4 || x > 251 || y < 4 || y > 251)
@@ -65,17 +80,19 @@ int main()
 {
     ArduCam::ArduCamTOFCamera tof;
     ArduCam::FrameBuffer *frame;
-    if (tof.init(ArduCam::CSI,ArduCam::DEPTH_TYPE)){
-        std::cerr<<"initialization failed"<<std::endl;
+    if (tof.init(ArduCam::CSI, ArduCam::DEPTH_TYPE))
+    {
+        std::cerr << "initialization failed" << std::endl;
         exit(-1);
     }
 
-    if (tof.start()){
-        std::cerr<<"Failed to start camera"<<std::endl;
+    if (tof.start())
+    {
+        std::cerr << "Failed to start camera" << std::endl;
         exit(-1);
     }
     //  Modify the range also to modify the MAX_DISTANCE
-    tof.setControl(ArduCam::RANGE,MAX_DISTANCE);
+    tof.setControl(ArduCam::RANGE, MAX_DISTANCE);
     ArduCam::CameraInfo tofFormat = tof.getCameraInfo();
 
     float *depth_ptr;
@@ -97,8 +114,12 @@ int main()
             cv::Mat depth_frame(tofFormat.height, tofFormat.width, CV_32F, depth_ptr);
             cv::Mat amplitude_frame(tofFormat.height, tofFormat.width, CV_32F, amplitude_ptr);
 
+            depth_frame = matRotateClockWise180(depth_frame);
+            result_frame = matRotateClockWise180(result_frame);
+            amplitude_frame = matRotateClockWise180(amplitude_frame);
+            
             cv::applyColorMap(result_frame, result_frame, cv::COLORMAP_JET);
-            amplitude_frame.convertTo(amplitude_frame, CV_8U,255.0/1024,0);
+            amplitude_frame.convertTo(amplitude_frame, CV_8U, 255.0 / 1024, 0);
             cv::imshow("amplitude", amplitude_frame);
             cv::rectangle(result_frame, seletRect, cv::Scalar(0, 0, 0), 2);
             cv::rectangle(result_frame, followRect, cv::Scalar(255, 255, 255), 1);

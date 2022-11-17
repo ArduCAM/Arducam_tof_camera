@@ -23,6 +23,19 @@ void display_fps(void)
     }
 }
 
+cv::Mat matRotateClockWise180(cv::Mat src)
+{
+    if (src.empty())
+    {
+        std::cerr << "RorateMat src is empty!";
+        return;
+    }
+
+    flip(src, src, 0);
+    flip(src, src, 1);
+    return src;
+}
+
 void getPreview(uint8_t *preview_ptr, float *phase_image_ptr, float *amplitude_image_ptr)
 {
     auto len = 240 * 180;
@@ -70,15 +83,14 @@ int main()
             cv::Mat depth_frame(tofFormat.height, tofFormat.width, CV_32F, depth_ptr);
             cv::Mat amplitude_frame(tofFormat.height, tofFormat.width, CV_32F, amplitude_ptr);
 
+            depth_frame = matRotateClockWise180(depth_frame);
+            result_frame = matRotateClockWise180(result_frame);
+            amplitude_frame = matRotateClockWise180(amplitude_frame);
+
             cv::applyColorMap(result_frame, result_frame, cv::COLORMAP_JET);
+            amplitude_frame.convertTo(amplitude_frame, CV_8U, 255.0 / 1024, 0);
 
-            amplitude_frame.forEach<float>([](float &p, const int *position) -> void
-                                           {   
-                if(p < 0) p=0;
-                else if(p > 255) p=255; });
-            amplitude_frame.convertTo(amplitude_frame, CV_8U);
             cv::imshow("amplitude", amplitude_frame);
-
             cv::imshow("preview", result_frame);
 
             if (cv::waitKey(1) == 27)

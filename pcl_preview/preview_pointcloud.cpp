@@ -102,7 +102,7 @@ int main()
 
             unsigned long int pos = 0;
             for (int row_idx = 0; row_idx < 180; row_idx++)
-                for (int col_idx = 0; col_idx < 180; col_idx++,pos++)
+                for (int col_idx = 0; col_idx < 240; col_idx++,pos++)
             {
                 if (amplitude_ptr[pos] > 30)
                 {

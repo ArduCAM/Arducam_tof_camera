@@ -28,7 +28,6 @@ cv::Mat matRotateClockWise180(cv::Mat src)
     if (src.empty())
     {
         std::cerr << "RorateMat src is empty!";
-        return;
     }
 
     flip(src, src, 0);

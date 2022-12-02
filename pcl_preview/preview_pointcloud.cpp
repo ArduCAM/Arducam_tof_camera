@@ -50,7 +50,6 @@ void getPreview(uint8_t *preview_ptr, float *depth_image_ptr, float *amplitude_i
 
 int main()
 {
-
     ArduCam::ArduCamTOFCamera tof;
     ArduCam::FrameBuffer *frame;
     std::time_t t;
@@ -70,12 +69,11 @@ int main()
     float *amplitude_ptr;
     uint8_t *preview_ptr = new uint8_t[43200];
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ptr(new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ> &pcloud = *cloud_ptr;
 
-    pcloud.points.push_back(pcl::PointXYZ(10, 10, 4));
-    pcloud.width = cloud_ptr->size();
-    pcloud.height = 1;
-    pcloud.is_dense = true;
+    cloud_ptr->points.push_back(pcl::PointXYZ(10, 10, 4));
+    cloud_ptr->width = cloud_ptr->size();
+    cloud_ptr->height = 1;
+    cloud_ptr->is_dense = true;
     vtkObject::GlobalWarningDisplayOff();
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer = simpleVis(cloud_ptr);
     // boost::thread vthread(&viewerRunner, viewer);
@@ -98,7 +96,7 @@ int main()
 
             cv::resize(result_frame, result_frame, cv::Size(720, 540));
             cv::imshow("preview", result_frame);
-            pcloud.clear();
+            cloud_ptr->clear();
 
             unsigned long int pos = 0;
             for (int row_idx = 0; row_idx < 180; row_idx++)
@@ -111,17 +109,17 @@ int main()
                     float xx = (((120 - col_idx)) / fx) * zz;
                     float yy = ((90 - row_idx) / fy) * zz;
                     pcl::PointXYZ ptemp(xx, yy, zz);
-                    pcloud.points.push_back(ptemp);
+                    cloud_ptr->points.push_back(ptemp);
                 }
                 else
                 {
                     pcl::PointXYZ ptemp(0, 0, 0);
-                    pcloud.points.push_back(ptemp);
+                    cloud_ptr->points.push_back(ptemp);
                 }
             }
-            pcloud.width = pcloud.points.size();
-            pcloud.height = 1;
-            pcloud.is_dense = false;
+            cloud_ptr->width = cloud_ptr->points.size();
+            cloud_ptr->height = 1;
+            cloud_ptr->is_dense = false;
             boost::mutex::scoped_lock updateLock(updateModelMutex);
             viewer->updatePointCloud<pcl::PointXYZ>(cloud_ptr, "sample cloud");
             updateLock.unlock();
@@ -148,7 +146,7 @@ int main()
                 t = std::time(0);
                 nowtime = localtime(&t);
                 sprintf(buff, "sensor_%d%d%d%d%d%d.pcd", 1900 + nowtime->tm_year, nowtime->tm_mon + 1,nowtime->tm_mday,nowtime->tm_hour + 1,nowtime->tm_min + 1,nowtime->tm_sec + 1);
-                pcl::io::savePCDFileASCII(buff, pcloud);
+                pcl::io::savePCDFileASCII(buff, *cloud_ptr);
                 std::cout << "save pcd!" << std::endl;
             }
         }

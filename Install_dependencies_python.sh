@@ -28,7 +28,7 @@ sudo apt-get -y install libqtgui4
 sudo apt-get -y install libqt4-test
 
 sudo pip3 install opencv-python ArduCamDepthCamera
-sudo pip3 numpy --upgrade
+sudo pip3 install numpy --upgrade
 
 modfiy_config
 

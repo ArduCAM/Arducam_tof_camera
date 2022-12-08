@@ -52,7 +52,7 @@ void getPreview(uint8_t *preview_ptr, float *phase_image_ptr, float *amplitude_i
 static void usage(const char *argv0)
 {
     fprintf(stderr, "Usage: %s [options]\n", argv0);
-    fprintf(stderr, "Available options are\n");
+    fprintf(stderr, "Available options are:\n");
     fprintf(stderr, " -d        Choose the video to use\n");
 
 }

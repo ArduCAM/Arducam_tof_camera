@@ -51,9 +51,25 @@ def usage(argv0):
 
 
 if __name__ == "__main__":
+    
+    if(len(sys.argv) < 2):
+        usage(sys.argv[0])
+        sys.exit()
+    opts, arg = getopt.getopt(sys.argv[1:], 'hd:', ['help'])
+    for option, value in opts:
+        if option in ['-d']:
+            if value.isdigit() == True:
+                select_video = int(value)
+            else:
+                usage(sys.argv[0])
+                sys.exit()
+        else:
+            usage(sys.argv[0])
+            sys.exit()
+
     cam = ac.ArducamCamera()
     max_distance = 4
-    if cam.init(ac.TOFConnect.CSI,ac.TOFOutput.DEPTH,0) != 0 :
+    if cam.init(ac.TOFConnect.CSI,ac.TOFOutput.DEPTH,select_video) != 0 :
         print("initialization failed")
         sys.exit()
     if cam.start() != 0 :

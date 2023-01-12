@@ -1,4 +1,4 @@
-## ArduCam Depth Camera 
+## Arducam Depth Camera 
 ### Run the example in the pcl_preview folder
 > Please refer to the instructions above for  _*a. Driver Install*_ , _*b.Configuration*_ and _*c.SDK install*_ whice run on RaspberryPi
 

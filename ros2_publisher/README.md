@@ -34,6 +34,6 @@ source ~/.bashrc
 #### Run
 ```Shell
   . install/setup.bash 
-  ros2 run arducam tof_pointcl
+  ros2 run arducam tof_pointcloud
 ```
 >You can preview by running rviz2 on the host in the LAN

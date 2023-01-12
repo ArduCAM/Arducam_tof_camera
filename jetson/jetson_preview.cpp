@@ -1,4 +1,4 @@
-#include "ArduCamTOFCamera.hpp"
+#include "ArducamTOFCamera.hpp"
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
@@ -7,7 +7,7 @@
 
 // MAX_DISTANCE value modifiable  is 2 or 4
 #define MAX_DISTANCE 4
-
+using namespace Arducam;
 void display_fps(void)
 {
     static int count = 0;
@@ -49,9 +49,9 @@ void getPreview(uint8_t *preview_ptr, float *phase_image_ptr, float *amplitude_i
 
 int main()
 {
-    ArduCam::ArduCamTOFCamera tof;
-    ArduCam::FrameBuffer *frame;
-    if (tof.init(ArduCam::CSI,ArduCam::DEPTH_TYPE)){
+    ArducamTOFCamera tof;
+    ArducamFrameBuffer *frame;
+    if (tof.init(Connection::CSI)){
         std::cerr<<"initialization failed"<<std::endl;
         exit(-1);
     }
@@ -61,8 +61,8 @@ int main()
         exit(-1);
     }
     //  Modify the range also to modify the MAX_DISTANCE
-    // tof.setControl(ArduCam::RANGE,MAX_DISTANCE);
-    ArduCam::CameraInfo tofFormat = tof.getCameraInfo();
+    // tof.setControl(ControlID::RANGE,MAX_DISTANCE);
+    CameraInfo tofFormat = tof.getCameraInfo();
 
     float *depth_ptr;
     float *amplitude_ptr;
@@ -74,8 +74,8 @@ int main()
         frame = tof.requestFrame(200);
         if (frame != nullptr)
         {
-            depth_ptr = (float *)frame->getData(ArduCam::DEPTH_FRAME);
-            amplitude_ptr = (float *)frame->getData(ArduCam::AMPLITUDE_FRAME);
+            depth_ptr = (float *)frame->getData(FrameType::DEPTH_FRAME);
+            amplitude_ptr = (float *)frame->getData(FrameType::AMPLITUDE_FRAME);
             getPreview(preview_ptr, depth_ptr, amplitude_ptr);
 
             cv::Mat result_frame(tofFormat.height, tofFormat.width, CV_8U, preview_ptr);

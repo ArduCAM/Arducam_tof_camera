@@ -1,13 +1,13 @@
 import sys
 import cv2
 import numpy as np
-import ArduCamDepthCamera as ac
+import ArducamDepthCamera as ac
 
 if __name__ == "__main__":
     cam = ac.ArducamCamera()
-    if cam.init(ac.TOFConnect.CSI,ac.TOFOutput.RAW,0) != 0 :
+    if cam.init(ac.TOFConnect.CSI,0) != 0 :
         print("initialization failed")
-    if cam.start() != 0 :
+    if cam.start(ac.TOFOutput.RAW) != 0 :
         print("Failed to start camera")
 
     while True:

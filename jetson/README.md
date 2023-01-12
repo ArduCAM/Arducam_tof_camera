@@ -1,4 +1,4 @@
-## ArduCam Depth Camera
+## Arducam Depth Camera
 ### Run project on Jetson
 #### Install dependencies
 > Run in the Arducam_tof_camera/jetson folder

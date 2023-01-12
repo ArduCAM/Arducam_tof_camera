@@ -1,11 +1,11 @@
 import sys
 import cv2
+import getopt
 import numpy as np
 import ArducamDepthCamera as ac
 
-print(dir(ac))
-
 MAX_DISTANCE = 4
+
 
 def process_frame(depth_buf: np.ndarray, amplitude_buf: np.ndarray) -> np.ndarray:
         
@@ -54,11 +54,29 @@ def usage(argv0):
 
 
 if __name__ == "__main__":
+    
+    if(len(sys.argv) < 2):
+        usage(sys.argv[0])
+        sys.exit()
+    opts, arg = getopt.getopt(sys.argv[1:], 'hd:', ['help'])
+    for option, value in opts:
+        if option in ['-d']:
+            if value.isdigit() == True:
+                select_video = int(value)
+            else:
+                usage(sys.argv[0])
+                sys.exit()
+        else:
+            usage(sys.argv[0])
+            sys.exit()
+
     cam = ac.ArducamCamera()
-    if cam.init(ac.TOFConnect.CSI,0) != 0 :
+    if cam.init(ac.TOFConnect.USB,select_video) != 0 :
         print("initialization failed")
+        sys.exit()
     if cam.start(ac.TOFOutput.DEPTH) != 0 :
         print("Failed to start camera")
+        sys.exit()
     cam.setControl(ac.TOFControl.RANG,MAX_DISTANCE)
     cv2.namedWindow("preview", cv2.WINDOW_AUTOSIZE)
     cv2.setMouseCallback("preview",on_mouse)

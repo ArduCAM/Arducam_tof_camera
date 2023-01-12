@@ -1,4 +1,4 @@
-#include "ArduCamDepthCamera.h"
+#include "ArducamDepthCamera.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -17,10 +17,10 @@ void getPreview(uint8_t *preview_ptr, float *phase_image_ptr, float *amplitude_i
 int main()
 {
     ArducamDepthCamera tof = createArducamDepthCamera();
-    FrameBuffer frame;
-    if (init(tof,CSI,DEPTH_TYPE,0))
+    ArducamFrameBuffer frame;
+    if (init(tof,CSI,0))
         exit(-1);
-    if (start(tof))
+    if (start(tof,DEPTH_FRAME))
         exit(-1);
     uint8_t *preview_ptr = malloc(180*240*sizeof(uint8_t)) ;
     float* depth_ptr = 0;

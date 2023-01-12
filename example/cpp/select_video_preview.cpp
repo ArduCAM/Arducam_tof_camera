@@ -1,4 +1,4 @@
-#include "ArduCamTOFCamera.hpp"
+#include "ArducamTOFCamera.hpp"
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
@@ -8,6 +8,7 @@
 
 // MAX_DISTANCE value modifiable  is 2 or 4
 #define MAX_DISTANCE 4
+using namespace Arducam;
 
 void display_fps(void)
 {
@@ -52,7 +53,7 @@ void getPreview(uint8_t *preview_ptr, float *phase_image_ptr, float *amplitude_i
 static void usage(const char *argv0)
 {
     fprintf(stderr, "Usage: %s [options]\n", argv0);
-    fprintf(stderr, "Available options are\n");
+    fprintf(stderr, "Available options are:\n");
     fprintf(stderr, " -d        Choose the video to use\n");
 
 }
@@ -80,10 +81,10 @@ int main(int argc, char *argv[])
         }
     }
 
-    ArduCam::ArduCamTOFCamera tof;
-    ArduCam::FrameBuffer *frame;
+    ArducamTOFCamera tof;
+    ArducamFrameBuffer *frame;
 
-    if (tof.init(ArduCam::CSI, ArduCam::DEPTH_TYPE,video))
+    if (tof.init(Connection::CSI,video))
     {
         std::cerr << "initialization failed" << std::endl;
         exit(-1);
@@ -95,8 +96,8 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     //  Modify the range also to modify the MAX_DISTANCE
-    tof.setControl(ArduCam::RANGE, MAX_DISTANCE);
-    ArduCam::CameraInfo tofFormat = tof.getCameraInfo();
+    tof.setControl(ControlID::RANGE, MAX_DISTANCE);
+    CameraInfo tofFormat = tof.getCameraInfo();
 
     float *depth_ptr;
     float *amplitude_ptr;
@@ -108,8 +109,8 @@ int main(int argc, char *argv[])
         frame = tof.requestFrame(200);
         if (frame != nullptr)
         {
-            depth_ptr = (float *)frame->getData(ArduCam::DEPTH_FRAME);
-            amplitude_ptr = (float *)frame->getData(ArduCam::AMPLITUDE_FRAME);
+            depth_ptr = (float *)frame->getData(FrameType::DEPTH_FRAME);
+            amplitude_ptr = (float *)frame->getData(FrameType::AMPLITUDE_FRAME);
             getPreview(preview_ptr, depth_ptr, amplitude_ptr);
 
             cv::Mat result_frame(tofFormat.height, tofFormat.width, CV_8U, preview_ptr);

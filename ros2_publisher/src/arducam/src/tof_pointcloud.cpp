@@ -7,12 +7,12 @@
 #include <std_msgs/msg/float32_multi_array.hpp>
 #include <vector>
 
-#include "ArduCamTOFCamera.hpp"
+#include "ArducamTOFCamera.hpp"
 
 using namespace std::chrono_literals;
+using namespace Arducam;
 
-
-ArduCam::ArduCamTOFCamera tof;
+ArducamTOFCamera tof;
 
 class TOFPublisher : public rclcpp::Node
 {
@@ -42,14 +42,14 @@ public:
 private:
     void generateSensorPointCloud()
     {
-        ArduCam::FrameBuffer *frame;
+        ArducamFrameBuffer *frame;
         do
         {
             frame = tof.requestFrame(200);
         } while (frame == nullptr);
         depth_frame.clear();
-        float *depth_ptr = (float *)frame->getData(ArduCam::DEPTH_FRAME);
-        float *amplitude_ptr = (float *)frame->getData(ArduCam::AMPLITUDE_FRAME);
+        float *depth_ptr = (float *)frame->getData(FrameType::DEPTH_FRAME);
+        float *amplitude_ptr = (float *)frame->getData(FrameType::AMPLITUDE_FRAME);
         unsigned long int pos = 0;
         for (int row_idx = 0; row_idx < 180; row_idx++)
             for (int col_idx = 0; col_idx < 240; col_idx++, pos++)
@@ -101,7 +101,7 @@ private:
 int main(int argc, char *argv[])
 {
     rclcpp::init(argc, argv);
-    if (tof.init(ArduCam::CSI,ArduCam::DEPTH_TYPE))
+    if (tof.init(Connection::CSI))
     {
         printf("initialize fail\n");
         exit(-1);
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
         printf("start fail\n");
         exit(-1);
     }
-    tof.setControl(ArduCam::RANGE,4);
+    tof.setControl(ControlID::RANGE,4);
 
     printf("pointcloud publisher start\n");
 

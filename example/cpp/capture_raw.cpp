@@ -1,27 +1,28 @@
-#include "ArduCamTOFCamera.hpp"
+#include "ArducamTOFCamera.hpp"
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <chrono>
 #include <iostream>
 
+using namespace Arducam;
 #define MAX_DISTANCE 4
 
 int main()
 {
-    ArduCam::ArduCamTOFCamera tof;
-    ArduCam::FrameBuffer *frame;
-    if (tof.init(ArduCam::CSI,ArduCam::RAW_TYPE)){
+    ArducamTOFCamera tof;
+    ArducamFrameBuffer *frame;
+    if (tof.init(Connection::CSI)){
         std::cerr<<"initialization failed"<<std::endl;
         exit(-1);
     }
-    if (tof.start()){
+    if (tof.start(FrameType::RAW_FRAME)){
         std::cerr<<"Failed to start camera"<<std::endl;
         exit(-1);
     }
     //  Modify the range also to modify the MAX_DISTANCE
-    tof.setControl(ArduCam::RANGE,MAX_DISTANCE);
-    ArduCam::CameraInfo tofFormat = tof.getCameraInfo();
+    tof.setControl(ControlID::RANGE,MAX_DISTANCE);
+    CameraInfo tofFormat = tof.getCameraInfo();
 
     int16_t *raw_ptr;
     int cols = tofFormat.height;
@@ -33,7 +34,7 @@ int main()
         frame = tof.requestFrame(200);
         if (frame != nullptr)
         {
-             raw_ptr = (int16_t*)frame->getData(ArduCam::RAW_FRAME);
+             raw_ptr = (int16_t*)frame->getData(FrameType::RAW_FRAME);
              cv::Mat raw_frame(cols, rows, CV_16S, raw_ptr);
              raw_frame.convertTo(raw_frame,CV_32F);
              cv::imshow("preview", raw_frame);

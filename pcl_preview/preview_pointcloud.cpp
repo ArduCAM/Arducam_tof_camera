@@ -10,10 +10,10 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <ctime>
-#include "ArduCamTOFCamera.hpp"
+#include "ArducamTOFCamera.hpp"
 
 #define MAX_DISTANCE 4
-
+using namespace Arducam;
 boost::mutex updateModelMutex;
 
 boost::shared_ptr<pcl::visualization::PCLVisualizer> simpleVis(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)
@@ -50,11 +50,11 @@ void getPreview(uint8_t *preview_ptr, float *depth_image_ptr, float *amplitude_i
 
 int main()
 {
-    ArduCam::ArduCamTOFCamera tof;
-    ArduCam::FrameBuffer *frame;
+    ArducamTOFCamera tof;
+    ArducamFrameBuffer *frame;
     std::time_t t;
     tm *nowtime;
-    if (tof.init(ArduCam::CSI, ArduCam::DEPTH_TYPE))
+    if (tof.init(Connection::CSI))
     {
         std::cerr << "initialization failed" << std::endl;
         exit(-1);
@@ -64,7 +64,7 @@ int main()
         std::cerr << "Failed to start camera" << std::endl;
         exit(-1);
     }
-    tof.setControl(ArduCam::RANGE, MAX_DISTANCE);
+    tof.setControl(ControlID::RANGE, MAX_DISTANCE);
     float *depth_ptr;
     float *amplitude_ptr;
     uint8_t *preview_ptr = new uint8_t[43200];
@@ -86,8 +86,8 @@ int main()
 
         if (frame != nullptr)
         {
-            depth_ptr = (float *)frame->getData(ArduCam::DEPTH_FRAME);
-            amplitude_ptr = (float *)frame->getData(ArduCam::AMPLITUDE_FRAME);
+            depth_ptr = (float *)frame->getData(FrameType::DEPTH_FRAME);
+            amplitude_ptr = (float *)frame->getData(FrameType::AMPLITUDE_FRAME);
             getPreview(preview_ptr, depth_ptr, amplitude_ptr);
             cv::Mat result_frame(180, 240, CV_8U, preview_ptr);
             cv::Mat amplitude_frame(180, 240, CV_32F, amplitude_ptr);

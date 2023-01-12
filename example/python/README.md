@@ -30,7 +30,7 @@ You need to alter the camera configuration in your /boot/config.txt file.to add 
 #### Install python dependencies
 ```Shell
   sudo apt update
-  sudo pip3 install opencv-python ArduCamDepthCamera
+  sudo pip3 install opencv-python ArducamDepthCamera
   sudo pip3 install numpy --upgrade
 ```
 #### example_python

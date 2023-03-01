@@ -72,12 +72,12 @@ if __name__ == "__main__":
             amplitude_buf = np.clip(amplitude_buf, 0, 255)
 
             cv2.imshow("preview_amplitude", amplitude_buf.astype(np.uint8))
-
+            print("select Rect distance:",np.mean(depth_buf[selectRect.start_y:selectRect.end_y,selectRect.start_x:selectRect.end_x]))
             result_image = process_frame(depth_buf,amplitude_buf)
             result_image = cv2.applyColorMap(result_image, cv2.COLORMAP_JET)
             cv2.rectangle(result_image,(selectRect.start_x,selectRect.start_y),(selectRect.end_x,selectRect.end_y),(128,128,128), 1)
             cv2.rectangle(result_image,(followRect.start_x,followRect.start_y),(followRect.end_x,followRect.end_y),(255,255,255), 1)
-            print("select Rect distance:",np.mean(depth_buf[selectRect.start_x:selectRect.end_x,selectRect.start_y:selectRect.end_y]))
+    
             cv2.imshow("preview",result_image)
 
             key = cv2.waitKey(1)

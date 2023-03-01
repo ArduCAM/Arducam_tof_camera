@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.4)
-include_directories(BEFORE /usr/include/c  /usr/include/cpp)
+include_directories(/usr/include/cpp)
 
 project(cpp_example)
 find_package( OpenCV REQUIRED )

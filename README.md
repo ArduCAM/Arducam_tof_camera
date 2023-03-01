@@ -8,7 +8,7 @@ The depth camera supports CSI and USB two connection methods, and needs an addit
 #### Install dependencies
 > Run in the Arducam_tof_camera folder
 ```Shell
-  ./Install_dependencies.sh
+  ./nstall_dependencies.sh
 ```
 ### compile && run
 > Run in the Arducam_tof_camera folder

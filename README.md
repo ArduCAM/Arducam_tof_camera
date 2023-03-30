@@ -8,24 +8,31 @@ The depth camera supports CSI and USB two connection methods, and needs an addit
 #### Install dependencies
 > Run in the Arducam_tof_camera folder
 ```Shell
-  ./nstall_dependencies.sh
+  ./Install_dependencies.sh
 ```
 ### compile && run
 > Run in the Arducam_tof_camera folder
 ```Shell
   ./compile.sh
 ```
-> You can also manually install and compile according to the following steps
+> You can also manually install and compile according to the following steps  
+
 #### 1.Driver Install
+> Note: Since 5.15.38, the arducam-pivariety driver has been merged into the Raspberry Pi kernel and the name of the device tree is changed to arducam-pivariety, so dtoverlay=arducam-pivariety is required to set the overlay
+<s>
+
 ```Shell
-  wget -O install_pivariety_pkgs.sh https://github.com/ArduCAM/Arducam-Pivariety-V4L2-Driver/releases/download/install_script/install_pivariety_pkgs.sh
-  chmod +x install_pivariety_pkgs.sh
-  ./install_pivariety_pkgs.sh -p kernel_driver
+  $ wget -O install_pivariety_pkgs.sh https://github.com/ArduCAM/Arducam-Pivariety-V4L2-Driver/releases/download/install_script/install_pivariety_pkgs.sh
+  $ chmod +x install_pivariety_pkgs.sh
+  $ ./install_pivariety_pkgs.sh -p kernel_driver
 ```
+
+</s>
+
 ### 2.Configuration
 You need to alter the camera configuration in your /boot/config.txt file.to add dtoverlay.
 ```Shell
-  dtoverlay=arducam,media-controller=0
+  dtoverlay=arducam-pivariety,media-controller=0
 ```
 > To override the automatic camera detection, Bullseye users will also need to delete the entry camera_auto_detect=1 if present in the config.txt file. Your Raspberry Pi will need to be rebooted after editing this file
 #### 3.SDK install
@@ -46,8 +53,7 @@ You need to alter the camera configuration in your /boot/config.txt file.to add 
 ```Shell
   cd Arducam_tof_camera/example
   mkdir build && cd build
-  cmake ..
-  make
+  cmake .. && make
 ```
 ### Start
 #### c test
@@ -61,6 +67,4 @@ You need to alter the camera configuration in your /boot/config.txt file.to add 
   ./cpp/preview_depth
   #or
   ./cpp/capture_raw
-    #or
-  ./cpp/preview_pointcloud
 ```

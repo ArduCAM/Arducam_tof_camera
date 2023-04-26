@@ -1,8 +1,12 @@
-### Run the example in the ros2_publisher folder
-> Please refer to the instructions above for  _*a. Driver Install*_ , _*b.Configuration*_ and _*c.SDK install*_ whice run on RaspberryPi
+## Run the example in the ros2_publisher folder
+**RaspberryPi:**  
+> Please refer to the instructions above for  _*a. Driver Install*_ , _*b.Configuration*_ and _*c.SDK install*_ whice run on RaspberryPi  
 
+**Jetson:**  
 > Please refer to the instructions above for  _*project dependencies*_ and _*SDK install*_ whice run on Jetson
-#### Ros2 installed on RaspberryPI
+### Ros2 installed on RaspberryPI
+**Note:** 
+This script only supports RaspberryPi OS bullseye 32-bit,If you want to run ros2 on 64-bit os, you can see this [repository](https://github.com/Ar-Ray-code/rpi-bullseye-ros2)
 >The example is based on ros2,We found the installation script on github, you can install it as follows, or you can install it yourself. author : [Ar-Ray](https://github.com/Ar-Ray-code/rpi-bullseye-ros2)
 ```Shell
 # default : (humble, arm7l)

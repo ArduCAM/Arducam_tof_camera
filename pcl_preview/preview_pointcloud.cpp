@@ -84,10 +84,10 @@ int main()
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ptr(new pcl::PointCloud<pcl::PointXYZ>);
 
-    // cloud_ptr->points.push_back(pcl::PointXYZ(10, 10, 4));
-    // cloud_ptr->width = cloud_ptr->size();
-    // cloud_ptr->height = 1;
-    // cloud_ptr->is_dense = true;
+    cloud_ptr->points.push_back(pcl::PointXYZ(10, 10, 4));
+    cloud_ptr->width = cloud_ptr->size();
+    cloud_ptr->height = 1;
+    cloud_ptr->is_dense = true;
     vtkObject::GlobalWarningDisplayOff();
 #if 0
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer = simpleVis(cloud_ptr);
@@ -132,7 +132,7 @@ int main()
                         cloud_ptr->points.push_back(ptemp);
                     }
                 }
-            cloud_ptr->width = cloud_ptr->points.size() - 1;
+            cloud_ptr->width = cloud_ptr->points.size();
             cloud_ptr->height = 1;
             cloud_ptr->is_dense = true;
             tof.releaseFrame(frame);

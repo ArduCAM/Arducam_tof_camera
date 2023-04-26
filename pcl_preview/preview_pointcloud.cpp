@@ -37,6 +37,17 @@ void viewerRunner(boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer)
         boost::this_thread::sleep(boost::posix_time::microseconds(100));
     }
 }
+#else
+pcl::visualization::PCLVisualizer simpleVis(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)
+{
+    pcl::visualization::PCLVisualizer viewer("3D Viewer");
+    viewer.addCoordinateSystem(0.01);
+    viewer.setCameraPosition(0, 0, 0, 0, 0, 0, 0, 0, -1);
+    viewer.setBackgroundColor(0, 0, 0);
+    viewer.addPointCloud<pcl::PointXYZ>(cloud, "sample cloud");
+    viewer.initCameraParameters();
+    return (viewer);
+}
 #endif
 
 void getPreview(uint8_t *preview_ptr, float *depth_image_ptr, float *amplitude_image_ptr)
@@ -73,10 +84,10 @@ int main()
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ptr(new pcl::PointCloud<pcl::PointXYZ>);
 
-    cloud_ptr->points.push_back(pcl::PointXYZ(10, 10, 4));
-    cloud_ptr->width = cloud_ptr->size();
-    cloud_ptr->height = 1;
-    cloud_ptr->is_dense = true;
+    // cloud_ptr->points.push_back(pcl::PointXYZ(10, 10, 4));
+    // cloud_ptr->width = cloud_ptr->size();
+    // cloud_ptr->height = 1;
+    // cloud_ptr->is_dense = true;
     vtkObject::GlobalWarningDisplayOff();
 #if 0
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer = simpleVis(cloud_ptr);
@@ -89,7 +100,6 @@ int main()
     for (;;)
     {
         frame = tof.requestFrame(200);
-
         if (frame != nullptr)
         {
             depth_ptr = (float *)frame->getData(FrameType::DEPTH_FRAME);
@@ -103,7 +113,6 @@ int main()
             cv::resize(result_frame, result_frame, cv::Size(720, 540));
             cv::imshow("preview", result_frame);
             cloud_ptr->clear();
-
             unsigned long int pos = 0;
             for (int row_idx = 0; row_idx < 180; row_idx++)
                 for (int col_idx = 0; col_idx < 240; col_idx++, pos++)
@@ -123,47 +132,53 @@ int main()
                         cloud_ptr->points.push_back(ptemp);
                     }
                 }
-            cloud_ptr->width = cloud_ptr->points.size();
+            cloud_ptr->width = cloud_ptr->points.size() - 1;
             cloud_ptr->height = 1;
-            cloud_ptr->is_dense = false;
+            cloud_ptr->is_dense = true;
+            tof.releaseFrame(frame);
 #if 0
             boost::mutex::scoped_lock updateLock(updateModelMutex);
             viewer->updatePointCloud<pcl::PointXYZ>(cloud_ptr, "sample cloud");
             updateLock.unlock();
-            viewer->spinOnce(100);
-            boost::this_thread::sleep(boost::posix_time::microseconds(100));
 #else
-            viewer->updatePointCloud<pcl::PointXYZ>(cloud_ptr, "sample cloud");
-            viewer->spinOnce(100);
+            viewer.updatePointCloud<pcl::PointXYZ>(cloud_ptr, "sample cloud");
+            viewer.spinOnce(100);
 #endif
 
             switch (cv::waitKey(1))
             {
             case 's':
+            {
                 std::time_t t = std::time(0);
                 tm *nowtime = localtime(&t);
                 sprintf(buff, "image_%d%d%d%d%d%d.png", 1900 + nowtime->tm_year, nowtime->tm_mon + 1, nowtime->tm_mday, nowtime->tm_hour + 1, nowtime->tm_min + 1, nowtime->tm_sec + 1);
                 cv::imwrite(buff, result_frame);
                 std::cout << "save image!" << std::endl;
                 break;
+            }
             case 'q':
-                cv::destroyAllWindows();
-                viewer->close();
-#if 0
-                vthread.join();
-#endif
-                tof.stop();
-                exit(0);
+                goto exit_main;
                 break;
             case 'd':
+            {
                 std::time_t t = std::time(0);
                 tm *nowtime = localtime(&t);
                 sprintf(buff, "sensor_%d%d%d%d%d%d.pcd", 1900 + nowtime->tm_year, nowtime->tm_mon + 1, nowtime->tm_mday, nowtime->tm_hour + 1, nowtime->tm_min + 1, nowtime->tm_sec + 1);
                 pcl::io::savePCDFileASCII(buff, *cloud_ptr);
                 std::cout << "save pcd!" << std::endl;
+                break;
+            }
             }
         }
-        tof.releaseFrame(frame);
     }
+exit_main:
+    cv::destroyAllWindows();
+#if 0
+    viewer->close();
+    vthread.join();
+#else
+    viewer.close();
+#endif
+    tof.stop();
     return 0;
 }

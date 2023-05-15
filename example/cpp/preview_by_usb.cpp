@@ -40,7 +40,7 @@ int main()
 {
     ArducamTOFCamera tof;
     ArducamFrameBuffer *frame;
-    if (tof.init(Connection::USB))
+    if (tof.open(Connection::USB))
     {
         std::cerr << "initialization failed" << std::endl;
         exit(-1);
@@ -87,6 +87,8 @@ int main()
     }
 
     if (tof.stop())
+        exit(-1);
+    if (tof.close())
         exit(-1);
     return 0;
 }

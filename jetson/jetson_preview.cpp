@@ -51,7 +51,7 @@ int main()
 {
     ArducamTOFCamera tof;
     ArducamFrameBuffer *frame;
-    if (tof.init(Connection::CSI)){
+    if (tof.open(Connection::CSI)){
         std::cerr<<"initialization failed"<<std::endl;
         exit(-1);
     }

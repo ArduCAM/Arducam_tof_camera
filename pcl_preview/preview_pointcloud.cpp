@@ -70,7 +70,7 @@ int main()
     float *depth_ptr;
     float *amplitude_ptr;
     uint8_t *preview_ptr = new uint8_t[43200];
-    if (tof.init(Connection::CSI))
+    if (tof.open(Connection::CSI))
     {
         std::cerr << "initialization failed" << std::endl;
         exit(-1);

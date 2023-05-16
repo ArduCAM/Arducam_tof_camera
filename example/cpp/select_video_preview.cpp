@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     ArducamTOFCamera tof;
     ArducamFrameBuffer *frame;
 
-    if (tof.init(Connection::CSI,video))
+    if (tof.open(Connection::CSI,video))
     {
         std::cerr << "initialization failed" << std::endl;
         exit(-1);
@@ -136,5 +136,8 @@ int main(int argc, char *argv[])
 
     if (tof.stop())
         exit(-1);
+    if (tof.close())
+        exit(-1);
+
     return 0;
 }

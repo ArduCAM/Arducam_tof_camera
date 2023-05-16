@@ -5,7 +5,7 @@ import ArducamDepthCamera as ac
 
 if __name__ == "__main__":
     cam = ac.ArducamCamera()
-    if cam.init(ac.TOFConnect.CSI,0) != 0 :
+    if cam.open(ac.TOFConnect.CSI,0) != 0 :
         print("initialization failed")
     if cam.start(ac.TOFOutput.RAW) != 0 :
         print("Failed to start camera")
@@ -20,4 +20,5 @@ if __name__ == "__main__":
             if key == ord("q"):
                 exit_ = True
                 cam.stop()
+                cam.close()
                 sys.exit(0)

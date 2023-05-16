@@ -71,7 +71,7 @@ if __name__ == "__main__":
             sys.exit()
 
     cam = ac.ArducamCamera()
-    if cam.init(ac.TOFConnect.USB,select_video) != 0 :
+    if cam.open(ac.TOFConnect.USB,select_video) != 0 :
         print("initialization failed")
         sys.exit()
     if cam.start(ac.TOFOutput.DEPTH) != 0 :
@@ -102,4 +102,5 @@ if __name__ == "__main__":
             if key == ord("q"):
                 exit_ = True
                 cam.stop()
+                cam.close()
                 sys.exit(0)

@@ -18,31 +18,34 @@ int main()
 {
     ArducamDepthCamera tof = createArducamDepthCamera();
     ArducamFrameBuffer frame;
-    if (init(tof,CSI,0))
+    if (arducamCameraOpen(tof,CSI,0))
         exit(-1);
-    if (start(tof,DEPTH_FRAME))
+    if (arducamCameraStart(tof,DEPTH_FRAME))
         exit(-1);
     uint8_t *preview_ptr = malloc(180*240*sizeof(uint8_t)) ;
     float* depth_ptr = 0;
     int16_t *raw_ptr = 0;
     float *amplitude_ptr = 0;
     FrameFormat format;
-    if ((frame = requestFrame(tof,200)) != 0x00){
-        format = getFormat(frame,DEPTH_FRAME);
+    if ((frame = arducamCameraRequestFrame(tof,200)) != 0x00){
+        format = arducamCameraGetFormat(frame,DEPTH_FRAME);
+        arducamCameraReleaseFrame(tof,frame);  
     }
     for (;;)
     {
-        if ((frame = requestFrame(tof,200)) != 0x00)
+        if ((frame = arducamCameraRequestFrame(tof,200)) != 0x00)
         {
-            depth_ptr = (float*)getDepthData(frame);
+            depth_ptr = (float*)arducamCameraGetDepthData(frame);
             printf("Center distance:%.2f.\n",depth_ptr[21600]);
-            amplitude_ptr = (float*)getAmplitudeData(frame);
+            amplitude_ptr = (float*)arducamCameraGetAmplitudeData(frame);
             getPreview(preview_ptr,depth_ptr,amplitude_ptr);
-            releaseFrame(tof,frame);  
+            arducamCameraReleaseFrame(tof,frame);  
         }
     }
 
-    if (stop(tof))
+    if (arducamCameraStop(tof))
+        exit(-1);
+    if (arducamCameraClose(tof))
         exit(-1);
     return 0;
 }

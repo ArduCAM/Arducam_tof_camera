@@ -4,3 +4,4 @@ install/
 log/
 py_arducam/
 CMakeFiles/
+*.patch

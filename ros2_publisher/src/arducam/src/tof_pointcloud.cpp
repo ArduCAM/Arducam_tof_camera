@@ -101,7 +101,7 @@ private:
 int main(int argc, char *argv[])
 {
     rclcpp::init(argc, argv);
-    if (tof.init(Connection::CSI))
+    if (tof.open(Connection::CSI))
     {
         printf("initialize fail\n");
         exit(-1);

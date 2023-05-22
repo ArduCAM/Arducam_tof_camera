@@ -112,12 +112,14 @@ int main(int argc, char *argv[])
         printf("start fail\n");
         exit(-1);
     }
-    tof.setControl(ControlID::RANGE,4);
+    tof.setControl(CameraCtrl::RANGE,4);
 
     printf("pointcloud publisher start\n");
 
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
     rclcpp::spin(std::make_shared<TOFPublisher>());
     rclcpp::shutdown();
+    tof.stop();
+    tof.close();
     return 0;
 }

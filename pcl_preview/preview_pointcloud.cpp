@@ -80,7 +80,7 @@ int main()
         std::cerr << "Failed to start camera" << std::endl;
         exit(-1);
     }
-    tof.setControl(ControlID::RANGE, MAX_DISTANCE);
+    tof.setControl(CameraCtrl::RANGE, MAX_DISTANCE);
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ptr(new pcl::PointCloud<pcl::PointXYZ>);
 
@@ -180,5 +180,6 @@ exit_main:
     viewer.close();
 #endif
     tof.stop();
+    tof.close();
     return 0;
 }

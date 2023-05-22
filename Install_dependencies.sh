@@ -40,8 +40,6 @@ sudo apt install -y arducam-config-parser-dev arducam-usb-sdk-dev arducam-tof-sd
 sudo apt-get install cmake -y
 sudo apt install libopencv-dev -y
 
-# sudo apt-get update
-
 echo "reboot now?(y/n):"
 read -r USER_INPUT
 case $USER_INPUT in

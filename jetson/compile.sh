@@ -15,7 +15,7 @@ else
   cd build || exit
   cmake .. && make
   if [ ! -x "$execfunc" ];then
-    echo "Compilation error, please check whether /dev/video0 exists, or check whether the driver and sdk are installed successfully!"
+    echo "Compilation error, please check whether the driver and sdk are installed successfully!"
   else
     $execfunc
   fi

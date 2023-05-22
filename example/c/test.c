@@ -26,7 +26,7 @@ int main()
     float* depth_ptr = 0;
     int16_t *raw_ptr = 0;
     float *amplitude_ptr = 0;
-    FrameFormat format;
+    ArducamFrameFormat format;
     if ((frame = arducamCameraRequestFrame(tof,200)) != 0x00){
         format = arducamCameraGetFormat(frame,DEPTH_FRAME);
         arducamCameraReleaseFrame(tof,frame);  

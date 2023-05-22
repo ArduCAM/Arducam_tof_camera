@@ -52,7 +52,7 @@ int main()
         exit(-1);
     }
     //  Modify the range also to modify the MAX_DISTANCE
-    tof.setControl(ControlID::RANGE, MAX_DISTANCE);
+    tof.setControl(CameraCtrl::RANGE, MAX_DISTANCE);
     CameraInfo tofFormat = tof.getCameraInfo();
 
     float *depth_ptr;

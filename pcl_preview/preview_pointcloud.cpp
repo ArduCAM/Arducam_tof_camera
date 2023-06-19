@@ -38,14 +38,14 @@ void viewerRunner(boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer)
     }
 }
 #else
-pcl::visualization::PCLVisualizer simpleVis(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)
+pcl::visualization::PCLVisualizer::Ptr simpleVis(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)
 {
-    pcl::visualization::PCLVisualizer viewer("3D Viewer");
-    viewer.addCoordinateSystem(0.01);
-    viewer.setCameraPosition(0, 0, 0, 0, 0, 0, 0, 0, -1);
-    viewer.setBackgroundColor(0, 0, 0);
-    viewer.addPointCloud<pcl::PointXYZ>(cloud, "sample cloud");
-    viewer.initCameraParameters();
+    pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer("3D Viewer"));
+    viewer->addCoordinateSystem(0.01);
+    viewer->setCameraPosition(0, 0, 0, 0, 0, 0, 0, 0, -1);
+    viewer->setBackgroundColor(0, 0, 0);
+    viewer->addPointCloud<pcl::PointXYZ>(cloud, "sample cloud");
+    viewer->initCameraParameters();
     return (viewer);
 }
 #endif
@@ -69,7 +69,8 @@ int main()
     char buff[60];
     float *depth_ptr;
     float *amplitude_ptr;
-    uint8_t *preview_ptr = new uint8_t[43200];
+    const unsigned int num_points = 43200;
+    uint8_t *preview_ptr = new uint8_t[num_points];
     if (tof.open(Connection::CSI))
     {
         std::cerr << "initialization failed" << std::endl;
@@ -84,16 +85,16 @@ int main()
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ptr(new pcl::PointCloud<pcl::PointXYZ>);
 
-    cloud_ptr->points.push_back(pcl::PointXYZ(10, 10, 4));
-    cloud_ptr->width = cloud_ptr->size();
-    cloud_ptr->height = 1;
-    cloud_ptr->is_dense = true;
+    // cloud_ptr->width = num_points;
+    // cloud_ptr->height = 1;
+    // cloud_ptr->is_dense = true;
+    // cloud_ptr->resize(num_points);
     vtkObject::GlobalWarningDisplayOff();
 #if 0
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer = simpleVis(cloud_ptr);
     boost::thread vthread(&viewerRunner, viewer);
 #else
-    pcl::visualization::PCLVisualizer viewer = simpleVis(cloud_ptr);
+    pcl::visualization::PCLVisualizer::Ptr viewer = simpleVis(cloud_ptr);
 #endif
     const float fx = 240 / (2 * tan(0.5 * M_PI * 64.3 / 180));
     const float fy = 180 / (2 * tan(0.5 * M_PI * 50.4 / 180));
@@ -120,17 +121,16 @@ int main()
                     if (amplitude_ptr[pos] > 30)
                     {
                         float zz = depth_ptr[pos];
-
                         float xx = (((120 - col_idx)) / fx) * zz;
                         float yy = ((90 - row_idx) / fy) * zz;
                         pcl::PointXYZ ptemp(xx, yy, zz);
                         cloud_ptr->points.push_back(ptemp);
                     }
-                    else
-                    {
-                        pcl::PointXYZ ptemp(0, 0, 0);
-                        cloud_ptr->points.push_back(ptemp);
-                    }
+                    // else
+                    // {
+                    //     pcl::PointXYZ ptemp(0, 0, 0);
+                    //     cloud_ptr->points.push_back(ptemp);
+                    // }
                 }
             cloud_ptr->width = cloud_ptr->points.size();
             cloud_ptr->height = 1;
@@ -141,8 +141,16 @@ int main()
             viewer->updatePointCloud<pcl::PointXYZ>(cloud_ptr, "sample cloud");
             updateLock.unlock();
 #else
-            viewer.updatePointCloud<pcl::PointXYZ>(cloud_ptr, "sample cloud");
-            viewer.spinOnce(100);
+            viewer->updatePointCloud<pcl::PointXYZ>(cloud_ptr, "sample cloud");
+            try
+            {
+                viewer->spinOnce(100);
+            }
+            catch (...)
+            {
+                std::cerr<<__FILE__<<'['<<__LINE__<<"]: "<<__FUNCTION__ << "viewer->spinOnce(100); Segmentation fault,You can refer to https://github.com/PointCloudLibrary/pcl/issues/5189 to solve the problem" << std::endl;
+                viewer->spin();
+            }
 #endif
 
             switch (cv::waitKey(1))
@@ -177,7 +185,7 @@ exit_main:
     viewer->close();
     vthread.join();
 #else
-    viewer.close();
+    viewer->close();
 #endif
     tof.stop();
     tof.close();

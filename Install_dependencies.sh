@@ -1,5 +1,5 @@
 #!/bin/sh
-FIND_FILE="/boot/config.txt"
+FIND_FILE="/boot/firmware/config.txt"
 
 # modfiy_config() {
     # modfiy config
@@ -19,13 +19,13 @@ FIND_FILE="/boot/config.txt"
 # fi
 
 if [ `grep -c "camera_auto_detect=1" $FIND_FILE` -ne '0' ];then
-    sudo sed -i "s/\(^camera_auto_detect=1\)/camera_auto_detect=0/" /boot/config.txt
+    sudo sed -i "s/\(^camera_auto_detect=1\)/camera_auto_detect=0/" /boot/firmware/config.txt
 fi
 if [ `grep -c "camera_auto_detect=0" $FIND_FILE` -lt '1' ];then
-    sudo bash -c 'echo camera_auto_detect=0 >> /boot/config.txt'
+    sudo bash -c 'echo camera_auto_detect=0 >> /boot/firmware/config.txt'
 fi
 if [ `grep -c "dtoverlay=arducam-pivariety,media-controller=0" $FIND_FILE` -lt '1' ];then
-    sudo bash -c 'echo dtoverlay=arducam-pivariety,media-controller=0 >> /boot/config.txt'
+    sudo bash -c 'echo dtoverlay=arducam-pivariety,media-controller=0 >> /boot/firmware/config.txt'
 fi
 
 if [ $(dpkg -l | grep -c arducam-tof-sdk-dev) -lt 1 ]; then

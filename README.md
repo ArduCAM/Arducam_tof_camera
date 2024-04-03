@@ -3,8 +3,8 @@
 This project is a use example based on arducam's depth camera. It includes basic image rendering using opencv, displaying 3D point clouds using PCL, and publishing depth camera data through the ROS2 system.
 The depth camera is the depth data obtained by calculating the phase difference based on the transmitted modulated pulse. The resolution of the camera is 240*180. Currently, it has two range modes: 2 meters and 4 meters. The measurement error is within 2 cm.
 The depth camera supports CSI and USB two connection methods, and needs an additional 5V 2A current power supply for the camera.
-### Run project on RassperyPi
-### Run the example in the exmaple folder
+### Run project on Raspberry Pi
+### Run the example in the example folder
 #### Install dependencies
 > Run in the Arducam_tof_camera folder
 ```Shell
@@ -30,7 +30,7 @@ The depth camera supports CSI and USB two connection methods, and needs an addit
 </s>
 
 ### 2.Configuration
-You need to alter the camera configuration in your /boot/config.txt file.to add dtoverlay.
+You need to alter the camera configuration in your /boot/firmware/config.txt file.to add dtoverlay.
 ```Shell
   dtoverlay=arducam-pivariety,media-controller=0
 ```

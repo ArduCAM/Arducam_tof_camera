@@ -1,14 +1,22 @@
 #!/bin/sh
-FIND_FILE="/boot/firmware/config.txt"
+
+if [ -f "/boot/firmware/config.txt" ]; then
+    FIND_FILE="/boot/firmware/config.txt"
+elif [ -f "/boot/config.txt" ]; then
+    FIND_FILE="/boot/config.txt"
+else
+    echo "No config.txt file found."
+    exit 1
+fi
 
 if [ `grep -c "camera_auto_detect=1" $FIND_FILE` -ne '0' ];then
-    sudo sed -i "s/\(^camera_auto_detect=1\)/camera_auto_detect=0/" /boot/firmware/config.txt
+    sudo sed -i "s/\(^camera_auto_detect=1\)/camera_auto_detect=0/" $FIND_FILE
 fi
 if [ `grep -c "camera_auto_detect=0" $FIND_FILE` -lt '1' ];then
-    sudo bash -c 'echo camera_auto_detect=0 >> /boot/firmware/config.txt'
+    sudo bash -c "echo camera_auto_detect=0 >> $FIND_FILE"
 fi
 if [ `grep -c "dtoverlay=arducam-pivariety,media-controller=0" $FIND_FILE` -lt '1' ];then
-    sudo bash -c 'echo dtoverlay=arducam-pivariety,media-controller=0 >> /boot/firmware/config.txt'
+    sudo bash -c "echo dtoverlay=arducam-pivariety,media-controller=0 >> $FIND_FILE"
 fi
 
 sudo apt update

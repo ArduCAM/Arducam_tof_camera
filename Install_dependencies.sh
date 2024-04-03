@@ -1,31 +1,25 @@
 #!/bin/sh
-FIND_FILE="/boot/firmware/config.txt"
 
-# modfiy_config() {
-    # modfiy config
-    # sudo sed -i "s/\(^camera_auto_detect=*\)/#\1/" /boot/config.txt
-    # sudo sed -i "s/\(^camera_auto_detect=1\)/#camera_auto_detect=0/" /boot/config.txt
-    # sudo bash -c 'echo camera_auto_detect=0 >> /boot/config.txt'
-    # sudo sed -i "s/\(^dtoverlay=*\)/#\1/" /boot/config.txt
-    # sudo bash -c 'echo dtoverlay=vc4-fkms-v3d >> /boot/config.txt'
-# }
+FIND_FILE=""
+if [ -f "/boot/firmware/config.txt" ]; then  # Bookworm
+    FIND_FILE="/boot/firmware/config.txt"
+elif [ -f "/boot/config.txt" ]; then         # Bullseye and earlier
+    FIND_FILE="/boot/config.txt"
+fi
 
-# if [ $(lsmod | grep -c arducam_pivariety) -ge 5 ]; then
-#     echo "Arducam tof camera driver already installed!"
-# else
-#     wget -O install_pivariety_pkgs.sh https://github.com/ArduCAM/Arducam-Pivariety-V4L2-Driver/releases/download/install_script/install_pivariety_pkgs.sh
-#     chmod +x install_pivariety_pkgs.sh
-#     ./install_pivariety_pkgs.sh -p kernel_driver
-# fi
+if [ "$FIND_FILE" = "" ]; then
+    echo "No config.txt file found."
+    exit 1
+fi
 
 if [ `grep -c "camera_auto_detect=1" $FIND_FILE` -ne '0' ];then
-    sudo sed -i "s/\(^camera_auto_detect=1\)/camera_auto_detect=0/" /boot/firmware/config.txt
+    sudo sed -i "s/\(^camera_auto_detect=1\)/camera_auto_detect=0/" $FIND_FILE
 fi
 if [ `grep -c "camera_auto_detect=0" $FIND_FILE` -lt '1' ];then
-    sudo bash -c 'echo camera_auto_detect=0 >> /boot/firmware/config.txt'
+    sudo bash -c "echo camera_auto_detect=0 >> $FIND_FILE"
 fi
 if [ `grep -c "dtoverlay=arducam-pivariety,media-controller=0" $FIND_FILE` -lt '1' ];then
-    sudo bash -c 'echo dtoverlay=arducam-pivariety,media-controller=0 >> /boot/firmware/config.txt'
+    sudo bash -c "echo dtoverlay=arducam-pivariety,media-controller=0 >> $FIND_FILE"
 fi
 
 if [ $(dpkg -l | grep -c arducam-tof-sdk-dev) -lt 1 ]; then

@@ -25,10 +25,6 @@ if [ $(grep -c "camera_auto_detect=0" $FIND_FILE) -lt '1' ];then
     sudo bash -c "echo camera_auto_detect=0 >> $FIND_FILE"
 fi
 
-if [ $(grep -c "dtoverlay=arducam-pivariety,media-controller=0" $FIND_FILE) -lt '1' ];then
-    sudo bash -c "echo dtoverlay=arducam-pivariety,media-controller=0 >> $FIND_FILE"
-fi
-
 if [ $(dpkg -l | grep -c arducam-tof-sdk-dev) -lt 1 ]; then
     echo "Add Arducam_ppa repositories."
     curl -s --compressed "https://arducam.github.io/arducam_ppa/KEY.gpg" | sudo apt-key add -

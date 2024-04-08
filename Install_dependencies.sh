@@ -3,8 +3,14 @@
 FIND_FILE=""
 if [ -f "/boot/firmware/config.txt" ]; then  # Bookworm
     FIND_FILE="/boot/firmware/config.txt"
+    if [ $(grep -c "dtoverlay=arducam-pivariety" $FIND_FILE) -lt '1' ];then
+        echo "dtoverlay=arducam-pivariety" | sudo tee -a $FIND_FILE
+    fi
 elif [ -f "/boot/config.txt" ]; then         # Bullseye and earlier
     FIND_FILE="/boot/config.txt"
+    if [ $(grep -c "dtoverlay=arducam-pivariety,media-controller=0" $FIND_FILE) -lt '1' ];then
+        echo "dtoverlay=arducam-pivariety,media-controller=0" | sudo tee -a $FIND_FILE
+    fi
 fi
 
 if [ "$FIND_FILE" = "" ]; then
@@ -12,13 +18,14 @@ if [ "$FIND_FILE" = "" ]; then
     exit 1
 fi
 
-if [ `grep -c "camera_auto_detect=1" $FIND_FILE` -ne '0' ];then
+if [ $(grep -c "camera_auto_detect=1" $FIND_FILE) -ne '0' ];then
     sudo sed -i "s/\(^camera_auto_detect=1\)/camera_auto_detect=0/" $FIND_FILE
 fi
-if [ `grep -c "camera_auto_detect=0" $FIND_FILE` -lt '1' ];then
+if [ $(grep -c "camera_auto_detect=0" $FIND_FILE) -lt '1' ];then
     sudo bash -c "echo camera_auto_detect=0 >> $FIND_FILE"
 fi
-if [ `grep -c "dtoverlay=arducam-pivariety,media-controller=0" $FIND_FILE` -lt '1' ];then
+
+if [ $(grep -c "dtoverlay=arducam-pivariety,media-controller=0" $FIND_FILE) -lt '1' ];then
     sudo bash -c "echo dtoverlay=arducam-pivariety,media-controller=0 >> $FIND_FILE"
 fi
 
@@ -34,7 +41,7 @@ sudo apt install -y arducam-config-parser-dev arducam-usb-sdk-dev arducam-tof-sd
 sudo apt-get install cmake -y
 sudo apt install libopencv-dev -y
 
-echo "reboot now?(y/n):"
+echo "reboot now? (y/n):"
 read -r USER_INPUT
 case $USER_INPUT in
 'y' | 'Y')
@@ -43,7 +50,7 @@ case $USER_INPUT in
     ;;
 *)
     echo "cancel"
-    echo "The script settings will only take effect after restarting, please restart yourself later."
+    echo "The script settings will only take effect after restarting. Please restart yourself later."
     exit 1
     ;;
 esac

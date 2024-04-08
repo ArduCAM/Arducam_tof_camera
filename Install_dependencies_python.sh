@@ -19,9 +19,6 @@ fi
 if [ `grep -c "camera_auto_detect=0" $FIND_FILE` -lt '1' ];then
     sudo bash -c "echo camera_auto_detect=0 >> $FIND_FILE"
 fi
-if [ `grep -c "dtoverlay=arducam-pivariety,media-controller=0" $FIND_FILE` -lt '1' ];then
-    sudo bash -c "echo dtoverlay=arducam-pivariety,media-controller=0 >> $FIND_FILE"
-fi
 
 sudo apt update
 sudo apt install -y libopencv-dev

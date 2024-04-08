@@ -1,12 +1,16 @@
 #!/bin/sh
 
-if [ -f "/boot/firmware/config.txt" ]; then
+FIND_FILE=""
+if [ -f "/boot/firmware/config.txt" ]; then  # Bookworm
     FIND_FILE="/boot/firmware/config.txt"
-elif [ -f "/boot/config.txt" ]; then
+    if [ $(grep -c "dtoverlay=arducam-pivariety" $FIND_FILE) -lt '1' ];then
+        echo "dtoverlay=arducam-pivariety" | sudo tee -a $FIND_FILE
+    fi
+elif [ -f "/boot/config.txt" ]; then         # Bullseye and earlier
     FIND_FILE="/boot/config.txt"
-else
-    echo "No config.txt file found."
-    exit 1
+    if [ $(grep -c "dtoverlay=arducam-pivariety,media-controller=0" $FIND_FILE) -lt '1' ];then
+        echo "dtoverlay=arducam-pivariety,media-controller=0" | sudo tee -a $FIND_FILE
+    fi
 fi
 
 if [ `grep -c "camera_auto_detect=1" $FIND_FILE` -ne '0' ];then

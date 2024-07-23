@@ -34,6 +34,7 @@ fi
 # install dependency
 sudo apt update
 sudo apt-get install -y cmake libopencv-dev arducam-config-parser-dev arducam-evk-sdk-dev arducam-tof-sdk-dev
+sudo python -m pip install ArducamDepthCamera opencv-python "numpy<2.0.0"
 
 echo "reboot now? (y/n):"
 read -r USER_INPUT

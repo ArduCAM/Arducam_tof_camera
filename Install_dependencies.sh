@@ -33,9 +33,7 @@ fi
 
 # install dependency
 sudo apt update
-sudo apt install -y arducam-config-parser-dev arducam-usb-sdk-dev arducam-tof-sdk-dev
-sudo apt-get install cmake -y
-sudo apt install libopencv-dev -y
+sudo apt-get install -y cmake libopencv-dev arducam-config-parser-dev arducam-evk-sdk-dev arducam-tof-sdk-dev
 
 echo "reboot now? (y/n):"
 read -r USER_INPUT

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.4)
 include_directories(/usr/include/c)
 
-project(Test_C)
-add_executable( test_c test.c )
-target_link_libraries( test_c ArducamDepthCamera2c)
+project(c_example)
+
+add_executable(preview_depth_c preview_depth.c)
+target_link_libraries(preview_depth_c ArducamDepthCamera2c)

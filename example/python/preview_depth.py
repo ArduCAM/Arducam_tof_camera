@@ -1,88 +1,137 @@
-import sys
 import cv2
 import numpy as np
 import ArducamDepthCamera as ac
 
-print(dir(ac))
 
-MAX_DISTANCE = 4
-
-def process_frame(depth_buf: np.ndarray, amplitude_buf: np.ndarray) -> np.ndarray:
-        
-    depth_buf = np.nan_to_num(depth_buf)
-
-    amplitude_buf[amplitude_buf<=7] = 0
-    amplitude_buf[amplitude_buf>7] = 255
-
-    depth_buf = (1 - (depth_buf/MAX_DISTANCE)) * 255
-    depth_buf = np.clip(depth_buf, 0, 255)
-    result_frame = depth_buf.astype(np.uint8)  & amplitude_buf.astype(np.uint8)
-    return result_frame 
-
-class UserRect():
+class UserRect:
     def __init__(self) -> None:
         self.start_x = 0
         self.start_y = 0
         self.end_x = 0
         self.end_y = 0
 
-selectRect = UserRect()
+    @property
+    def rect(self):
+        return (
+            self.start_x,
+            self.start_y,
+            self.end_x - self.start_x,
+            self.end_y - self.start_y,
+        )
 
-followRect = UserRect()
+    @property
+    def slice(self):
+        return (slice(self.start_y, self.end_y), slice(self.start_x, self.end_x))
+
+    @property
+    def empty(self):
+        return self.start_x == self.end_x and self.start_y == self.end_y
+
+
+confidence_value = 30
+selectRect, followRect = UserRect(), UserRect()
+
+
+def getPreviewRGB(preview: np.ndarray, confidence: np.ndarray) -> np.ndarray:
+    preview = np.nan_to_num(preview)
+    preview[confidence < confidence_value] = (0, 0, 0)
+    return preview
+
 
 def on_mouse(event, x, y, flags, param):
-    global selectRect,followRect
-    
+    global selectRect, followRect
+
     if event == cv2.EVENT_LBUTTONDOWN:
         pass
 
     elif event == cv2.EVENT_LBUTTONUP:
-        selectRect.start_x = x - 4 if x - 4 > 0 else 0
-        selectRect.start_y = y - 4 if y - 4 > 0 else 0
-        selectRect.end_x = x + 4 if x + 4 < 240 else 240
-        selectRect.end_y=  y + 4 if y + 4 < 180 else 180
+        selectRect.start_x = x - 4
+        selectRect.start_y = y - 4
+        selectRect.end_x = x + 4
+        selectRect.end_y = y + 4
     else:
-        followRect.start_x = x - 4 if x - 4 > 0 else 0
-        followRect.start_y = y - 4 if y - 4 > 0 else 0
-        followRect.end_x = x + 4 if x + 4 < 240 else 240
-        followRect.end_y = y + 4 if y + 4 < 180 else 180
-        
+        followRect.start_x = x - 4
+        followRect.start_y = y - 4
+        followRect.end_x = x + 4
+        followRect.end_y = y + 4
+
+
+def on_confidence_changed(value):
+    global confidence_value
+    confidence_value = value
+
+
 def usage(argv0):
-    print("Usage: python "+argv0+" [options]")
+    print("Usage: python " + argv0 + " [options]")
     print("Available options are:")
     print(" -d        Choose the video to use")
 
 
-if __name__ == "__main__":
+def main():
     cam = ac.ArducamCamera()
-    if cam.open(ac.TOFConnect.CSI,0) != 0 :
-        print("initialization failed")
-    if cam.start(ac.TOFOutput.DEPTH) != 0 :
-        print("Failed to start camera")
-    cam.setControl(ac.TOFControl.RANG,MAX_DISTANCE)
+    cfg_path = None
+    black_color = (0, 0, 0)
+    white_color = (255, 255, 255)
+
+    ret = 0
+    if cfg_path is not None:
+        ret = cam.openWithFile(cfg_path, 0)
+    else:
+        ret = cam.open(ac.TOFConnect.CSI, 0)
+    if ret != 0:
+        print("initialization failed. Error code:", ret)
+        return
+
+    ret = cam.start(ac.TOFOutput.DEPTH)
+    if ret != 0:
+        print("Failed to start camera. Error code:", ret)
+        cam.close()
+        return
+
+    r = cam.getControl(ac.TOFControl.RANGE)
+
+    info = cam.getCameraInfo()
+    print(f"Camera resolution: {info.width}x{info.height}")
+
     cv2.namedWindow("preview", cv2.WINDOW_AUTOSIZE)
-    cv2.setMouseCallback("preview",on_mouse)
+    cv2.setMouseCallback("preview", on_mouse)
+
+    print(f"{info.device_type=}")
+    if info.device_type == ac.TOFDeviceType.VGA:
+        # Only VGA support confidence
+        cv2.createTrackbar(
+            "confidence", "preview", confidence_value, 255, on_confidence_changed
+        )
+
     while True:
-        frame = cam.requestFrame(200)
-        if frame != None:
+        frame = cam.requestFrame(2000)
+        if frame is not None and isinstance(frame, ac.DepthData):
             depth_buf = frame.getDepthData()
-            amplitude_buf = frame.getAmplitudeData()
+            confidence_buf = frame.getConfidenceData()
+
+            result_image = (depth_buf * (255.0 / r)).astype(np.uint8)
+            result_image = cv2.applyColorMap(result_image, cv2.COLORMAP_RAINBOW)
+            result_image = getPreviewRGB(result_image, confidence_buf)
+
+            cv2.normalize(confidence_buf, confidence_buf, 1, 0, cv2.NORM_MINMAX)
+
+            cv2.imshow("preview_confidence", confidence_buf)
+
+            cv2.rectangle(result_image, followRect.rect, white_color, 1)
+            if not selectRect.empty:
+                cv2.rectangle(result_image, selectRect.rect, black_color, 2)
+                print("select Rect distance:", np.mean(depth_buf[selectRect.slice]))
+
+            cv2.imshow("preview", result_image)
             cam.releaseFrame(frame)
-            amplitude_buf*=(255/1024)
-            amplitude_buf = np.clip(amplitude_buf, 0, 255)
 
-            cv2.imshow("preview_amplitude", amplitude_buf.astype(np.uint8))
-            print("select Rect distance:",np.mean(depth_buf[selectRect.start_y:selectRect.end_y,selectRect.start_x:selectRect.end_x]))
-            result_image = process_frame(depth_buf,amplitude_buf)
-            result_image = cv2.applyColorMap(result_image, cv2.COLORMAP_JET)
-            cv2.rectangle(result_image,(selectRect.start_x,selectRect.start_y),(selectRect.end_x,selectRect.end_y),(128,128,128), 1)
-            cv2.rectangle(result_image,(followRect.start_x,followRect.start_y),(followRect.end_x,followRect.end_y),(255,255,255), 1)
-    
-            cv2.imshow("preview",result_image)
+        key = cv2.waitKey(1)
+        if key == ord("q"):
+            break
 
-            key = cv2.waitKey(1)
-            if key == ord("q"):
-                exit_ = True
-                cam.stop()
-                cam.close()
-                sys.exit(0)
+    cam.stop()
+    cam.close()
+
+
+if __name__ == "__main__":
+    main()

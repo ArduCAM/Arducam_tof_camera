@@ -16,6 +16,12 @@ cv::Rect followRect(0, 0, 0, 0);
 int max_width = 240;
 int max_height = 180;
 int max_range = 0;
+int confidence_value = 30;
+
+void on_confidence_changed(int pos, void* userdata)
+{
+    //
+}
 
 void display_fps(void)
 {
@@ -56,15 +62,21 @@ cv::Mat matRotateClockWise180(cv::Mat src)
     return src;
 }
 
-void getPreview(uint8_t* preview_ptr, float* phase_image_ptr, float* amplitude_image_ptr)
+void getPreview(cv::Mat preview_ptr, cv::Mat amplitude_image_ptr)
 {
-    auto len = 240 * 180;
-    for (auto i = 0; i < len; i++) {
-        uint8_t mask = *(amplitude_image_ptr + i) > 30 ? 254 : 0;
-        float depth = ((1 - (*(phase_image_ptr + i) / MAX_DISTANCE)) * 255);
-        uint8_t pixel = depth > 255 ? 255 : depth;
-        *(preview_ptr + i) = pixel & mask;
+    auto len = preview_ptr.rows * preview_ptr.cols;
+    for (int line = 0; line < preview_ptr.rows; line++) {
+        for (int col = 0; col < preview_ptr.cols; col++) {
+            if (amplitude_image_ptr.at<float>(line, col) < confidence_value)
+                preview_ptr.at<uint8_t>(line, col) = 255;
+        }
     }
+}
+
+void getPreviewRGB(cv::Mat preview_ptr, cv::Mat amplitude_image_ptr)
+{
+    preview_ptr.setTo(cv::Scalar(0, 0, 0), amplitude_image_ptr < confidence_value);
+    // cv::GaussianBlur(preview_ptr, preview_ptr, cv::Size(7, 7), 0);
 }
 
 void onMouse(int event, int x, int y, int flags, void* param)
@@ -95,8 +107,8 @@ int main()
 {
     ArducamTOFCamera tof;
     ArducamFrameBuffer* frame;
-    if (tof.open(Connection::CSI)) {
-        std::cerr << "initialization failed" << std::endl;
+    if (tof.open(Connection::CSI, 0)) {
+        std::cerr << "Failed to open camera" << std::endl;
         return -1;
     }
 
@@ -110,8 +122,6 @@ int main()
     auto info = tof.getCameraInfo();
     std::cout << "open camera with (" << info.width << "x" << info.height << ")" << std::endl;
 
-    float* depth_ptr;
-    float* amplitude_ptr;
     uint8_t* preview_ptr = new uint8_t[info.width * info.height * 2];
     cv::namedWindow("preview", cv::WINDOW_AUTOSIZE);
     cv::setMouseCallback("preview", onMouse);
@@ -127,23 +137,25 @@ int main()
         max_height = format.height;
         max_width = format.width;
 
-        depth_ptr = (float*)frame->getData(FrameType::DEPTH_FRAME);
-        amplitude_ptr = (float*)frame->getData(FrameType::CONFIDENCE_FRAME);
-        // getPreview(preview_ptr, depth_ptr, amplitude_ptr);
+        float* depth_ptr = (float*)frame->getData(FrameType::DEPTH_FRAME);
+        float* confidence_ptr = (float*)frame->getData(FrameType::CONFIDENCE_FRAME);
+        // getPreview(preview_ptr, depth_ptr, confidence_ptr);
 
         cv::Mat result_frame(format.height, format.width, CV_8U, preview_ptr);
         cv::Mat depth_frame(format.height, format.width, CV_32F, depth_ptr);
-        cv::Mat amplitude_frame(format.height, format.width, CV_32F, amplitude_ptr);
+        cv::Mat confidence_frame(format.height, format.width, CV_32F, confidence_ptr);
 
         // depth_frame = matRotateClockWise180(depth_frame);
         // result_frame = matRotateClockWise180(result_frame);
-        // amplitude_frame = matRotateClockWise180(amplitude_frame);
+        // confidence_frame = matRotateClockWise180(confidence_frame);
         depth_frame.convertTo(result_frame, CV_8U, 255.0 / 7000, 0);
 
         cv::applyColorMap(result_frame, result_frame, cv::COLORMAP_RAINBOW);
-        amplitude_frame.convertTo(amplitude_frame, CV_8U, 255.0 / 1024, 0);
+        getPreviewRGB(result_frame, confidence_frame);
 
-        cv::imshow("amplitude", amplitude_frame);
+        confidence_frame.convertTo(confidence_frame, CV_8U, 255.0 / 1024, 0);
+
+        cv::imshow("confidence", confidence_frame);
 
         cv::rectangle(result_frame, seletRect, cv::Scalar(0, 0, 0), 2);
         cv::rectangle(result_frame, followRect, cv::Scalar(255, 255, 255), 1);

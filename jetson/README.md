@@ -34,15 +34,31 @@
   sudo apt update
   sudo apt install arducam-config-parser-dev arducam-usb-sdk-dev arducam-tof-sdk-dev
 ```
+
 ##### Compilation
+
 ```Shell
-  cd Arducam_tof_camera
-  mkdir build && cd build
-  cmake ..
+  cd Arducam_tof_camera/example
+  mkdir build && cd build && cmake ..
   make
 ```
-#### Start Jetson Preview
+
+### Start
+
+#### c test
+
 > Run in the example/build folder
+
 ```Shell
-  ./jetson/jetson_preview 
+  ./c/test_c
+```
+
+#### cpp example
+
+> Run in the example/build folder
+
+```Shell
+  ./cpp/preview_depth
+  #or
+  ./cpp/capture_raw
 ```

@@ -1,86 +1,94 @@
-## Arducam Depth Camera
+# Arducam Depth Camera
 
-### Overview
+## Overview
 
 This project is a use example based on arducam's depth camera. It includes basic image rendering using opencv, displaying 3D point clouds using PCL, and publishing depth camera data through the ROS2 system.
 The depth camera is the depth data obtained by calculating the phase difference based on the transmitted modulated pulse. The resolution of the camera is 240*180. Currently, it has two range modes: 2 meters and 4 meters. The measurement error is within 2 cm.
 The depth camera supports CSI and USB two connection methods, and needs an additional 5V 2A current power supply for the camera.
 
-### Run project on Raspberry Pi
+## Quick Start
 
-### Run the example in the example folder
+### Clone this repository
 
-#### Install dependencies
+Clone this repository and enter the directory.
+
+```shell
+  git clone https://github.com/ArduCAM/Arducam_tof_camera.git
+  cd Arducam_tof_camera
+```
+
+### Install dependencies for Raspberry Pi
 
 > Run in the Arducam_tof_camera folder
+> Whatever you want to run the C/C++ examples or Python examples, you need to install the dependencies.
 
-```Shell
+```shell
   ./Install_dependencies.sh
 ```
 
-### compile && run
+### Install dependencies for Jetson
+
+> Run in the Arducam_tof_camera folder
+> Whatever you want to run the C/C++ examples or Python examples, you need to install the dependencies.
+
+```shell
+  ./Install_dependencies_jetson.sh
+```
+
+### Run the examples on Raspberry Pi or Jetson
+
+#### C/C++ Examples
+
+##### Compile
 
 > Run in the Arducam_tof_camera folder
 
-```Shell
+```shell
   ./compile.sh
 ```
 
-> You can also manually install and compile according to the following steps  
+##### Run
 
+###### C Example
 
-### 1.Configuration
+> Run in the build/example/c folder
 
-You need to alter the camera configuration in your /boot/firmware/config.txt file.to add dtoverlay.
-
-```Shell
-  dtoverlay=arducam-pivariety,media-controller=0
+```shell
+  cd build/example/c
 ```
 
-> To override the automatic camera detection, Bullseye users will also need to delete the entry camera_auto_detect=1 if present in the config.txt file. Your Raspberry Pi will need to be rebooted after editing this file
-
-#### 2.SDK install
-
-```Shell
-  curl -s --compressed "https://arducam.github.io/arducam_ppa/KEY.gpg" | sudo apt-key add -
-  sudo curl -s --compressed -o /etc/apt/sources.list.d/arducam_list_files.list "https://arducam.github.io/arducam_ppa/arducam_list_files.list"
-  sudo apt update
-  sudo apt install arducam-config-parser-dev arducam-evk-sdk-dev arducam-tof-sdk-dev
+```shell
+  ./preview_depth_c
 ```
 
-### c&cpp example
+###### C++ Example
 
-#### project dependencies
+> Run in the build/example/cpp folder
 
-```Shell
-  sudo apt-get update
-  sudo apt-get install -y build-essential cmake libopencv-dev
+```shell
+  cd build/example/cpp
 ```
 
-##### Compilation
-
-```Shell
-  cd Arducam_tof_camera/example
-  mkdir build && cd build && cmake ..
-  make
-```
-
-### Start
-
-#### c test
-
-> Run in the example/build folder
-
-```Shell
-  ./c/test_c
-```
-
-#### cpp example
-
-> Run in the example/build folder
-
-```Shell
-  ./cpp/preview_depth
+```shell
+  ./preview_depth
   #or
-  ./cpp/capture_raw
+  ./capture_raw
+```
+
+#### Python Examples
+
+##### Run
+
+###### Python Example
+
+> Run in the example/python folder
+
+```shell
+  cd example/python
+```
+
+```shell
+  python3 preview_depth.py
+  #or
+  python3 capture_raw.py
 ```

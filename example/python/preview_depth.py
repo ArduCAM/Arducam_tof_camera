@@ -79,7 +79,7 @@ def main():
     else:
         ret = cam.open(ac.TOFConnect.CSI, 0)
     if ret != 0:
-        print("initialization failed. Error code:", ret)
+        print("Failed to open camera. Error code:", ret)
         return
 
     ret = cam.start(ac.TOFOutput.DEPTH)
@@ -96,7 +96,6 @@ def main():
     cv2.namedWindow("preview", cv2.WINDOW_AUTOSIZE)
     cv2.setMouseCallback("preview", on_mouse)
 
-    print(f"{info.device_type=}")
     if info.device_type == ac.TOFDeviceType.VGA:
         # Only VGA support confidence
         cv2.createTrackbar(

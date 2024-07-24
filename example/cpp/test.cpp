@@ -106,17 +106,6 @@ LOCAL void display_fps(void)
 }
 #endif
 
-LOCAL void getPreview(uint8_t* preview_ptr, float* phase_image_ptr, float* amplitude_image_ptr)
-{
-    auto len = 240 * 180;
-    for (int i = 0; i < len; i++) {
-        uint8_t mask = *(amplitude_image_ptr + i) > 30 ? 254 : 0;
-        float depth = ((1 - (*(phase_image_ptr + i) / MAX_DISTANCE)) * 255);
-        uint8_t pixel = depth > 255 ? 255 : depth;
-        *(preview_ptr + i) = pixel & mask;
-    }
-}
-
 LOCAL void getPreview(cv::Mat preview_ptr, cv::Mat amplitude_image_ptr)
 {
     auto len = preview_ptr.rows * preview_ptr.cols;

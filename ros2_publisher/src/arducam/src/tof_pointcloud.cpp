@@ -49,7 +49,7 @@ private:
         } while (frame == nullptr);
         depth_frame.clear();
         float *depth_ptr = (float *)frame->getData(FrameType::DEPTH_FRAME);
-        float *amplitude_ptr = (float *)frame->getData(FrameType::AMPLITUDE_FRAME);
+        float *amplitude_ptr = (float *)frame->getData(FrameType::CONFIDENCE_FRAME);
         unsigned long int pos = 0;
         for (int row_idx = 0; row_idx < 180; row_idx++)
             for (int col_idx = 0; col_idx < 240; col_idx++, pos++)

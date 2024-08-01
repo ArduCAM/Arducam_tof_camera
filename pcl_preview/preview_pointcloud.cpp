@@ -96,16 +96,20 @@ int main(int argc, char* argv[])
         }
     }
 
-    if (1) {
-        tof.setControl(CameraCtrl::FMT_WIDTH, 640);
-        tof.setControl(CameraCtrl::FMT_HEIGHT, 480);
-        tof.setControl(CameraCtrl::MODE, to_int(TofWorkMode::DOUBLE_FREQ));
-        tof.setControl(CameraCtrl::FRAME_MODE, to_int(TofFrameWorkMode::DOUBLE_FREQ_4PHASE_GRAY_4PHASE_BG));
-    } else {
-        tof.setControl(CameraCtrl::FMT_WIDTH, 640);
-        tof.setControl(CameraCtrl::FMT_HEIGHT, 480);
-        tof.setControl(CameraCtrl::MODE, to_int(TofWorkMode::SINGLE_FREQ));
-        tof.setControl(CameraCtrl::FRAME_MODE, to_int(TofFrameWorkMode::SINGLE_FREQ_4PHASE_GRAY));
+    auto info = tof.getCameraInfo();
+
+    if (info.device_type == DeviceType::DEVICE_VGA) {
+        if (1) {
+            tof.setControl(CameraCtrl::FMT_WIDTH, 640);
+            tof.setControl(CameraCtrl::FMT_HEIGHT, 480);
+            tof.setControl(CameraCtrl::MODE, to_int(TofWorkMode::DOUBLE_FREQ));
+            tof.setControl(CameraCtrl::FRAME_MODE, to_int(TofFrameWorkMode::DOUBLE_FREQ_4PHASE_GRAY_4PHASE_BG));
+        } else {
+            tof.setControl(CameraCtrl::FMT_WIDTH, 640);
+            tof.setControl(CameraCtrl::FMT_HEIGHT, 480);
+            tof.setControl(CameraCtrl::MODE, to_int(TofWorkMode::SINGLE_FREQ));
+            tof.setControl(CameraCtrl::FRAME_MODE, to_int(TofFrameWorkMode::SINGLE_FREQ_4PHASE_GRAY));
+        }
     }
 
     if (tof.start(FrameType::DEPTH_FRAME)) {
@@ -114,7 +118,7 @@ int main(int argc, char* argv[])
     }
 
     tof.getControl(CameraCtrl::RANGE, &max_range);
-    auto info = tof.getCameraInfo();
+    info = tof.getCameraInfo();
     std::cout << "open camera with (" << info.width << "x" << info.height << ") with range " << max_range << std::endl;
     // double x = 0, y = 0, z = 0, dx = 0, dy = 0, dz = 0;
 

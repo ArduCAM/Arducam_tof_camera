@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.4)
 project(PreviewPointcloud)
 add_compile_options(-Wno-psabi)
 find_package(PCL QUIET COMPONENTS common io visualization)
@@ -12,6 +12,7 @@ if(WITH_OPENCV_WORLD)
 else()
   set(CORE_LIBS ${CORE_LIBS} ${OpenCV_LIBS})
 endif()
+link_directories(${PCL_LIBRARY_DIRS})
 
 if(PCL_FOUND)
     message(STATUS "LIBPCL_LINK_LIBRARIES=${PCL_INCLUDE_DIRS}")
@@ -20,9 +21,6 @@ if(PCL_FOUND)
     target_include_directories(preview_pointcloud PRIVATE
         ${OpenCV_INCLUDE_DIRS}
         ${PCL_INCLUDE_DIRS}
-    )
-    target_link_directories(preview_pointcloud PRIVATE
-      ${PCL_LIBRARY_DIRS}
     )
     target_compile_definitions(preview_pointcloud PRIVATE
         ${PCL_DEFINITIONS}

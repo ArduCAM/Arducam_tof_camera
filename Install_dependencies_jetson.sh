@@ -1,5 +1,13 @@
 #!/bin/sh
 
+# install dependency
+sudo apt update
+if ! sudo apt install -y cmake curl python3-pip python3-opencv python3-numpy >/dev/null 2>&1; then
+    echo -e "\033[31m[ERR]\033[0m Failed to install dependencies."
+    echo -e "\033[31m[ERR]\033[0m Please check your network connection."
+    exit 1
+fi
+
 if [ $(dpkg -l | grep -c arducam) -lt 1 ]; then
     echo "Add Arducam_ppa repositories."
     curl -s --compressed "https://arducam.github.io/arducam_ppa/KEY.gpg" | sudo apt-key add -
@@ -8,7 +16,11 @@ fi
 
 # install dependency
 sudo apt update
-sudo apt install -y cmake curl arducam-config-parser-dev arducam-evk-sdk-dev arducam-tof-sdk-dev python3-pip python3-opencv python3-numpy
+if ! sudo apt install -y arducam-config-parser-dev arducam-evk-sdk-dev arducam-tof-sdk-dev >/dev/null 2>&1; then
+    echo -e "\033[31m[ERR]\033[0m Failed to install tof sdk."
+    echo -e "\033[31m[ERR]\033[0m Please check your network connection."
+    exit 1
+fi
 if ! sudo python -m pip install ArducamDepthCamera >/dev/null 2>&1; then
     if ! sudo python -m pip install ArducamDepthCamera --break-system-packages >/dev/null 2>&1; then
         echo -e "\033[31m[ERR]\033[0m Failed to install ArducamDepthCamera."

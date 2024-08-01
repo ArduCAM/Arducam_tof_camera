@@ -28,13 +28,12 @@ link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
 add_executable(tof_pointcloud src/tof_pointcloud.cpp)
-ament_target_dependencies(tof_pointcloud rclcpp std_msgs sensor_msgs
+ament_target_dependencies(tof_pointcloud rclcpp std_msgs sensor_msgs)
+target_link_libraries(tof_pointcloud ArducamDepthCamera)
+
+install(TARGETS tof_pointcloud
+  DESTINATION lib/${PROJECT_NAME}
 )
-target_link_libraries(tof_pointcloud  ArducamDepthCamera
-)
-install(TARGETS
-tof_pointcloud
-  DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

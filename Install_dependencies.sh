@@ -3,12 +3,12 @@
 FIND_FILE=""
 if [ -f "/boot/firmware/config.txt" ]; then # Bookworm
     FIND_FILE="/boot/firmware/config.txt"
-    if [ $(grep -c "dtoverlay=arducam-pivariety" $FIND_FILE) -lt '1' ]; then
+    if [ $(grep -c -e '^dtoverlay=arducam-pivariety' $FIND_FILE) -lt '1' ]; then
         echo "dtoverlay=arducam-pivariety" | sudo tee -a $FIND_FILE
     fi
 elif [ -f "/boot/config.txt" ]; then # Bullseye and earlier
     FIND_FILE="/boot/config.txt"
-    if [ $(grep -c "dtoverlay=arducam-pivariety" $FIND_FILE) -lt '1' ]; then
+    if [ $(grep -c -e '^dtoverlay=arducam-pivariety' $FIND_FILE) -lt '1' ]; then
         echo "dtoverlay=arducam-pivariety" | sudo tee -a $FIND_FILE
     fi
 fi
@@ -25,6 +25,13 @@ if [ $(grep -c "camera_auto_detect=0" $FIND_FILE) -lt '1' ]; then
     sudo bash -c "echo camera_auto_detect=0 >> $FIND_FILE"
 fi
 
+sudo apt update
+if ! sudo apt-get install -y cmake curl libopencv-dev python3-pip python3-opencv python3-numpy >/dev/null 2>&1; then
+    echo -e "\033[31m[ERR]\033[0m Failed to install dependencies."
+    echo -e "\033[31m[ERR]\033[0m Please check your network connection."
+    exit 1
+fi
+
 if [ $(dpkg -l | grep -c arducam-tof-sdk-dev) -lt 1 ]; then
     echo "Add Arducam_ppa repositories."
     curl -s --compressed "https://arducam.github.io/arducam_ppa/KEY.gpg" | sudo apt-key add -
@@ -33,14 +40,18 @@ fi
 
 # install dependency
 sudo apt update
-sudo apt-get install -y cmake libopencv-dev arducam-config-parser-dev arducam-evk-sdk-dev arducam-tof-sdk-dev python3-pip python3-opencv python3-numpy
+if ! sudo apt-get install -y arducam-config-parser-dev arducam-evk-sdk-dev arducam-tof-sdk-dev >/dev/null 2>&1; then
+    echo -e "\033[31m[ERR]\033[0m Failed to install tof sdk."
+    echo -e "\033[31m[ERR]\033[0m Please check your network connection."
+    exit 1
+fi
 if ! sudo python -m pip install ArducamDepthCamera >/dev/null 2>&1; then
     if ! sudo python -m pip install ArducamDepthCamera --break-system-packages >/dev/null 2>&1; then
         echo -e "\033[31m[ERR]\033[0m Failed to install ArducamDepthCamera."
     fi
 fi
 # python -m pip install ArducamDepthCamera opencv-python "numpy<2.0.0"
-echo -e "\033[32m[INFO]\033[0m To install for python venv."
+echo -e "\033[32m[INFO]\033[0m If you want to install for python venv."
 echo -e "  please run: python -m pip install ArducamDepthCamera opencv-python \"numpy<2.0.0\""
 
 echo "reboot now? (y/n):"

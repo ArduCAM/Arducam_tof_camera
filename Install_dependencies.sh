@@ -3,13 +3,13 @@
 FIND_FILE=""
 if [ -f "/boot/firmware/config.txt" ]; then # Bookworm
     FIND_FILE="/boot/firmware/config.txt"
-    if [ $(grep -c -e '^dtoverlay=arducam-pivariety' $FIND_FILE) -lt '1' ]; then
-        echo "dtoverlay=arducam-pivariety" | sudo tee -a $FIND_FILE
+    if [ $(grep -c -e '^dtoverlay=arducam-pivariety,media-controller=0' $FIND_FILE) -lt '1' ]; then
+        echo "dtoverlay=arducam-pivariety,media-controller=0" | sudo tee -a $FIND_FILE
     fi
 elif [ -f "/boot/config.txt" ]; then # Bullseye and earlier
     FIND_FILE="/boot/config.txt"
-    if [ $(grep -c -e '^dtoverlay=arducam-pivariety' $FIND_FILE) -lt '1' ]; then
-        echo "dtoverlay=arducam-pivariety" | sudo tee -a $FIND_FILE
+    if [ $(grep -c -e '^dtoverlay=arducam-pivariety,media-controller=0' $FIND_FILE) -lt '1' ]; then
+        echo "dtoverlay=arducam-pivariety,media-controller=0" | sudo tee -a $FIND_FILE
     fi
 fi
 

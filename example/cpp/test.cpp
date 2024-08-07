@@ -19,7 +19,17 @@ cv::Rect seletRect(0, 0, 0, 0);
 cv::Rect followRect(0, 0, 0, 0);
 int max_width = 240;
 int max_height = 180;
-int max_range = 0;
+
+struct opt_data {
+    bool raw = false;
+    bool no_amplitude = false;
+    int device = 0;
+    int mode = -1;
+    const char* cfg = nullptr;
+    int fps = -1;
+    int min_range = 0;
+    int max_range = 0;
+};
 
 enum class DType {
     f32,
@@ -106,20 +116,31 @@ LOCAL void display_fps(void)
 }
 #endif
 
-LOCAL void getPreview(cv::Mat preview_ptr, cv::Mat amplitude_image_ptr)
+LOCAL void getPreview(uint8_t* preview_ptr, float* phase_image_ptr, float* confidence_image_ptr)
+{
+    auto len = 240 * 180;
+    for (int i = 0; i < len; i++) {
+        uint8_t mask = *(confidence_image_ptr + i) > 30 ? 254 : 0;
+        float depth = ((1 - (*(phase_image_ptr + i) / MAX_DISTANCE)) * 255);
+        uint8_t pixel = depth > 255 ? 255 : depth;
+        *(preview_ptr + i) = pixel & mask;
+    }
+}
+
+LOCAL void getPreview(cv::Mat preview_ptr, cv::Mat confidence_image_ptr)
 {
     auto len = preview_ptr.rows * preview_ptr.cols;
     for (int line = 0; line < preview_ptr.rows; line++) {
         for (int col = 0; col < preview_ptr.cols; col++) {
-            if (amplitude_image_ptr.at<float>(line, col) < confidence_value)
+            if (confidence_image_ptr.at<float>(line, col) < confidence_value)
                 preview_ptr.at<uint8_t>(line, col) = 255;
         }
     }
 }
 
-LOCAL void getPreviewRGB(cv::Mat preview_ptr, cv::Mat amplitude_image_ptr)
+LOCAL void getPreviewRGB(cv::Mat preview_ptr, cv::Mat confidence_image_ptr)
 {
-    preview_ptr.setTo(cv::Scalar(0, 0, 0), amplitude_image_ptr < confidence_value);
+    preview_ptr.setTo(cv::Scalar(0, 0, 0), confidence_image_ptr < confidence_value);
     // cv::GaussianBlur(preview_ptr, preview_ptr, cv::Size(7, 7), 0);
 }
 
@@ -201,7 +222,7 @@ void onMouse(int event, int x, int y, int flags, void* param)
     }
 }
 
-LOCAL bool raw_loop(Arducam::ArducamTOFCamera& tof, uint8_t* preview_ptr)
+LOCAL bool raw_loop(Arducam::ArducamTOFCamera& tof, const opt_data& data)
 {
     Arducam::ArducamFrameBuffer* frame = tof.requestFrame(2000);
     if (frame == nullptr) {
@@ -234,7 +255,7 @@ LOCAL bool raw_loop(Arducam::ArducamTOFCamera& tof, uint8_t* preview_ptr)
     return true;
 }
 
-LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, uint8_t* preview_ptr)
+LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, const opt_data& data)
 {
     // auto info = tof.getCameraInfo();
     Arducam::ArducamFrameBuffer* frame = tof.requestFrame(2000);
@@ -246,33 +267,46 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, uint8_t* preview_ptr)
     std::cout << "frame: (" << format.width << "x" << format.height << "), time: " << format.timestamp << std::endl;
     max_height = format.height;
     max_width = format.width;
-
+    const int min_range = data.min_range, max_range = data.max_range;
+    if (1000000000000UL <= format.timestamp && format.timestamp <= 9000000000000UL) {
+        // a timestamp in milliseconds (13 digits)
+        uint64_t now = std::chrono::system_clock::now().time_since_epoch() / 1ms;
+        printf("timestamp: %lu, now: %lu, diff: %lums\n", format.timestamp, now, now - format.timestamp);
+    } else if (1000000000UL <= format.timestamp && format.timestamp <= 9000000000UL) {
+        // a timestamp in seconds (10 digits)
+        uint64_t now = std::chrono::system_clock::now().time_since_epoch() / 1s;
+        printf("timestamp: %lu, now: %lu, diff: %lus\n", format.timestamp, now, now - format.timestamp);
+    } else {
+        // invalid timestamp from epoch
+    }
     float* depth_ptr = (float*)frame->getData(FrameType::DEPTH_FRAME);
-    float* amplitude_ptr = (float*)frame->getData(FrameType::CONFIDENCE_FRAME);
-    // getPreview(preview_ptr, depth_ptr, amplitude_ptr);
+    float* amplitude_ptr = (float*)frame->getData(FrameType::AMPLITUDE_FRAME);
+    float* confidence_ptr = (float*)frame->getData(FrameType::CONFIDENCE_FRAME);
 
     cv::Mat result_frame(format.height, format.width, CV_8U);
     cv::Mat depth_frame(format.height, format.width, CV_32F, depth_ptr);
     cv::Mat amplitude_frame(format.height, format.width, CV_32F, amplitude_ptr);
+    cv::Mat confidence_frame(format.height, format.width, CV_32F, confidence_ptr);
 
-    depth_frame.convertTo(result_frame, CV_8U, 255.0 / max_range, 0);
-    // getPreview(result_frame, amplitude_frame);
+    depth_frame.convertTo(result_frame, CV_8U, 255.0 / (max_range - min_range),
+                          (-min_range * 255.0) / (max_range - min_range));
+    // getPreview(result_frame, confidence_frame);
     cv::applyColorMap(result_frame, result_frame, cv::COLORMAP_RAINBOW);
-    getPreviewRGB(result_frame, amplitude_frame);
+    result_frame.setTo(cv::Scalar(0, 0, 0), depth_frame < min_range);
+    getPreviewRGB(result_frame, confidence_frame);
 
-    // amplitude_frame.convertTo(amplitude_frame, CV_8U, 255.0 / max_range, 0);
+    // confidence_frame.convertTo(confidence_frame, CV_8U, 255.0 / max_range, 0);
+    cv::normalize(confidence_frame, confidence_frame, 1, 0, cv::NORM_MINMAX);
     cv::normalize(amplitude_frame, amplitude_frame, 1, 0, cv::NORM_MINMAX);
-
-    // cv::imshow("result_frame", result_frame);
-    cv::imshow("amplitude", amplitude_frame);
 
     cv::rectangle(result_frame, seletRect, cv::Scalar(0, 0, 0), 2);
     cv::rectangle(result_frame, followRect, cv::Scalar(255, 255, 255), 1);
 
-    // std::cout << "select Rect distance: " << cv::mean(depth_frame(seletRect)).val[0] << std::endl;
-
     cv::imshow("preview", result_frame);
-    cv::setMouseCallback("preview", onMouse);
+    cv::imshow("confidence", confidence_frame);
+    if (!data.no_amplitude) {
+        cv::imshow("amplitude", amplitude_frame);
+    }
 
     std::cout << "select Rect distance: " << cv::mean(depth_frame(seletRect)).val[0] << std::endl;
 
@@ -295,13 +329,139 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, uint8_t* preview_ptr)
 #define set_ctl_(tof, ctrl, val) check(tof.setControl(CameraCtrl::ctrl, val), "set control(" #ctrl ", " #val ") failed")
 #define set_ctl(ctrl, val)       set_ctl_(tof, ctrl, val)
 
+LOCAL bool parse_opt(int argc, char* argv[], opt_data& opt);
+
+int main(int argc, char* argv[])
+{
+    opt_data opt;
+
+    if (!parse_opt(argc, argv, opt)) {
+        return -1;
+    }
+
+    Arducam::ArducamTOFCamera tof;
+    // if (tof.openWithFile(Arducam::DEPTH_FRAME, "imx316_mcu.cfg", 375e5))
+    if (opt.cfg) {
+        check(tof.openWithFile(opt.cfg, opt.device), "open camera failed");
+    } else {
+        check(tof.open(Connection::CSI, opt.device), "open camera failed");
+    }
+
+    int option = opt.mode;
+    auto info = tof.getCameraInfo();
+    if (option == -1) {
+        // hqvga device does not support the other resolutions
+        option = info.device_type == Arducam::DeviceType::DEVICE_VGA ? 3 : 4;
+    }
+
+    switch (option) {
+    case 0:
+        printf("320 * 240 with single frequency\n");
+        break;
+    case 1:
+        printf("320 * 240 with double frequency\n");
+        break;
+    case 2:
+        printf("640 * 480 with single frequency\n");
+        break;
+    case 3:
+        printf("640 * 480 with double frequency\n");
+        break;
+    case 4:
+        printf("keep default\n");
+        break;
+    default:
+        return -1;
+    }
+
+    if (option == 4) {
+        // do nothing
+    } else {
+        if (option & 2) {
+            set_ctl(FMT_WIDTH, 640);
+            set_ctl(FMT_HEIGHT, 480);
+        } else {
+            set_ctl(FMT_WIDTH, 640 / 2);
+            set_ctl(FMT_HEIGHT, 480 / 2);
+        }
+
+        if (option & 1) {
+            set_ctl(MODE, to_int(TofWorkMode::DOUBLE_FREQ));
+        } else {
+            set_ctl(MODE, to_int(TofWorkMode::SINGLE_FREQ));
+        }
+    }
+
+    if (opt.raw) {
+        check(tof.start(FrameType::RAW_FRAME), "start camera failed");
+    } else {
+        check(tof.start(FrameType::DEPTH_FRAME), "start camera failed");
+    }
+
+    if (opt.fps != -1) {
+        int max_fps = 0;
+        tof.getControl(CameraCtrl::FRAME_RATE, &max_fps);
+        if (opt.fps > max_fps) {
+            std::cerr << "Invalid fps: " << opt.fps << ", max fps: " << max_fps << std::endl;
+            return -1;
+        }
+        tof.setControl(CameraCtrl::FRAME_RATE, opt.fps);
+    }
+
+    // int rang = 0;
+    // tof.setControl(CameraCtrl::RANGE, MAX_DISTANCE);
+    // tof.getControl(CameraCtrl::RANGE, &rang);
+    // std::cout << rang << std::endl;
+
+    info = tof.getCameraInfo();
+    int max_range;
+    tof.getControl(CameraCtrl::RANGE, &max_range);
+    std::cout << "open camera with (" << info.width << "x" << info.height << ") with range " << max_range << std::endl;
+
+    if (opt.max_range == 0) {
+        opt.max_range = max_range;
+    }
+
+    cv::namedWindow("preview", cv::WINDOW_NORMAL);
+    cv::setMouseCallback("preview", onMouse);
+
+    if (info.device_type == Arducam::DeviceType::DEVICE_VGA) {
+        // only vga support confidence
+        cv::createTrackbar("confidence", "preview", &confidence_value, 255, on_confidence_changed);
+    }
+    cv::setMouseCallback("preview", onMouse);
+
+    if (opt.raw) {
+        for (; raw_loop(tof, opt);) {
+        }
+    } else {
+        cv::namedWindow("confidence", cv::WINDOW_NORMAL);
+        if (!opt.no_amplitude) {
+            cv::namedWindow("amplitude", cv::WINDOW_NORMAL);
+        }
+        for (; depth_loop(tof, opt);) {
+        }
+    }
+
+    if (tof.stop()) {
+        fprintf(stderr, "stop camera failed\n");
+    }
+    if (tof.close()) {
+        fprintf(stderr, "close camera failed\n");
+    }
+    return 0;
+}
+
+/* #region parse_opt */
+
 void help(int argc, char* argv[])
 {
     std::cout << "Usage: " << argv[0] << " [OPTION]" << std::endl;
     std::cout << "  -h,--help           Display this information" << std::endl;
     std::cout << "  -v,--version        Display the version of the program" << std::endl;
-    std::cout << "  --device NUM        Set the device number" << std::endl;
+    std::cout << "  -d,--device NUM     Set the device number" << std::endl;
     std::cout << "  --raw/--depth       Display the raw or depth frame" << std::endl;
+    std::cout << "  -A,--no-amplitude   Display the depth frame without amplitude" << std::endl;
     std::cout << "  --fps FPS           Set the fps of the camera" << std::endl;
     std::cout << "  --mode MODE         Set the mode of the camera" << std::endl;
     std::cout << "      0               320 * 240 with single frequency" << std::endl;
@@ -309,6 +469,8 @@ void help(int argc, char* argv[])
     std::cout << "      2               640 * 480 with single frequency" << std::endl;
     std::cout << "      3(*)            640 * 480 with double frequency (default)" << std::endl;
     std::cout << "  --cfg PATH          The usb camera config file path" << std::endl;
+    std::cout << "  -m,--min-range NUM  Set the min range of the camera (mm)" << std::endl;
+    std::cout << "  -M,--max-range NUM  Set the max range of the camera (mm)" << std::endl;
 }
 
 enum class ArgEnum {
@@ -318,9 +480,12 @@ enum class ArgEnum {
     device,
     raw,
     depth,
+    no_amplitude,
     fps,
     mode,
     cfg,
+    min_range,
+    max_range,
 };
 
 template <ArgEnum arg_enum> LOCAL const char* to_str()
@@ -342,18 +507,14 @@ template <ArgEnum arg_enum> LOCAL const char* to_str()
         return "mode";
     case ArgEnum::cfg:
         return "cfg";
+    case ArgEnum::min_range:
+        return "min_range";
+    case ArgEnum::max_range:
+        return "max_range";
     default:
         return "unknown";
     }
 }
-
-struct opt_data {
-    bool raw = false;
-    int device = 0;
-    int mode = 3;
-    const char* cfg = nullptr;
-    int fps = -1;
-};
 
 LOCAL bool __parse_cfg(opt_data& data, const char* path)
 {
@@ -393,6 +554,33 @@ template <ArgEnum arg_enum> LOCAL int __parse_opt(int argc, char* argv[], int cu
     } break;
     case ArgEnum::depth: {
         data.raw = false;
+    } break;
+    case ArgEnum::no_amplitude: {
+        data.no_amplitude = true;
+    } break;
+    case ArgEnum::min_range: {
+        if (curr + 1 >= argc) {
+            std::cerr << "Invalid min range" << std::endl;
+            return 0;
+        }
+        data.min_range = atoi(argv[curr + 1]);
+        if (data.min_range < 0) {
+            std::cerr << "Invalid min range" << std::endl;
+            return 0;
+        }
+        return 2;
+    } break;
+    case ArgEnum::max_range: {
+        if (curr + 1 >= argc) {
+            std::cerr << "Invalid max range" << std::endl;
+            return 0;
+        }
+        data.max_range = atoi(argv[curr + 1]);
+        if (data.max_range < 0) {
+            std::cerr << "Invalid max range" << std::endl;
+            return 0;
+        }
+        return 2;
     } break;
     case ArgEnum::mode: {
         if (curr + 1 >= argc) {
@@ -470,7 +658,10 @@ LOCAL int __parse_opt(int argc, char* argv[], int curr, opt_data& data)
                 // SHORT('r', ArgEnum::raw)
                 SHORT('h', ArgEnum::help)
                 SHORT('v', ArgEnum::version)
+                SHORT('A', ArgEnum::no_amplitude)
                 SHORT_END('d', ArgEnum::device)
+                SHORT_END('m', ArgEnum::min_range)
+                SHORT_END('M', ArgEnum::max_range)
             default:
                 return 0;
             }
@@ -482,6 +673,9 @@ LOCAL int __parse_opt(int argc, char* argv[], int curr, opt_data& data)
         LONG("cfg", ArgEnum::cfg)
         LONG("raw", ArgEnum::raw)
         LONG("depth", ArgEnum::depth)
+        LONG("no-amplitude", ArgEnum::no_amplitude)
+        LONG("min-range", ArgEnum::min_range)
+        LONG("max-range", ArgEnum::max_range)
         LONG("mode", ArgEnum::mode)
         LONG("fps", ArgEnum::fps)
         LONG("help", ArgEnum::help)
@@ -498,110 +692,24 @@ LOCAL int __parse_opt(int argc, char* argv[], int curr, opt_data& data)
     return 1;
 }
 
-int main(int argc, char* argv[])
+LOCAL bool parse_opt(int argc, char* argv[], opt_data& opt)
 {
-    opt_data opt;
-    int& option = opt.mode;
     for (int i = 1; i < argc;) {
         int tmp = __parse_opt(argc, argv, i, opt);
         if (tmp == 0) {
             std::cerr << "Invalid option: " << argv[i] << std::endl;
-            return -1;
+            return false;
         }
         i += tmp;
     }
 
-    Arducam::ArducamTOFCamera tof;
-    // if (tof.openWithFile(Arducam::DEPTH_FRAME, "imx316_mcu.cfg", 375e5))
-    if (opt.cfg) {
-        check(tof.openWithFile(opt.cfg, opt.device), "open camera failed");
-    } else {
-        check(tof.open(Connection::CSI, opt.device), "open camera failed");
+    // check
+    if (opt.no_amplitude && opt.raw) {
+        std::cerr << "Invalid option: --no-amplitude and --raw are exclusive" << std::endl;
+        return false;
     }
 
-    switch (option) {
-    case 0:
-        printf("320 * 240 with single frequency\n");
-        break;
-    case 1:
-        printf("320 * 240 with double frequency\n");
-        break;
-    case 2:
-        printf("640 * 480 with single frequency\n");
-        break;
-    case 3:
-        printf("640 * 480 with double frequency\n");
-        break;
-    }
-
-    if (option == 4) {
-        // do nothing
-    } else {
-        if (option & 2) {
-            set_ctl(FMT_WIDTH, 640);
-            set_ctl(FMT_HEIGHT, 480);
-        } else {
-            set_ctl(FMT_WIDTH, 640 / 2);
-            set_ctl(FMT_HEIGHT, 480 / 2);
-        }
-
-        if (option & 1) {
-            set_ctl(MODE, to_int(TofWorkMode::DOUBLE_FREQ));
-            set_ctl(FRAME_MODE, to_int(TofFrameWorkMode::DOUBLE_FREQ_4PHASE_GRAY_4PHASE_BG));
-        } else {
-            set_ctl(MODE, to_int(TofWorkMode::SINGLE_FREQ));
-            set_ctl(FRAME_MODE, to_int(TofFrameWorkMode::SINGLE_FREQ_4PHASE_GRAY));
-        }
-    }
-
-    if (opt.fps != -1) {
-        int max_fps = 0;
-        tof.getControl(CameraCtrl::FRAME_RATE, &max_fps);
-        if (opt.fps > max_fps) {
-            std::cerr << "Invalid fps: " << opt.fps << ", max fps: " << max_fps << std::endl;
-            return -1;
-        }
-        tof.setControl(CameraCtrl::FRAME_RATE, opt.fps);
-    }
-
-    if (opt.raw) {
-        check(tof.start(FrameType::RAW_FRAME), "start camera failed");
-    } else {
-        check(tof.start(FrameType::DEPTH_FRAME), "start camera failed");
-    }
-
-    // int rang = 0;
-    // tof.setControl(CameraCtrl::RANGE, MAX_DISTANCE);
-    // tof.getControl(CameraCtrl::RANGE, &rang);
-    // std::cout << rang << std::endl;
-
-    auto info = tof.getCameraInfo();
-    tof.getControl(CameraCtrl::RANGE, &max_range);
-    std::cout << "open camera with (" << info.width << "x" << info.height << ") with range " << max_range << std::endl;
-
-    uint8_t* preview_ptr = new uint8_t[info.width * info.height * 2];
-
-    cv::namedWindow("preview", cv::WINDOW_NORMAL);
-
-    cv::createTrackbar("confidence", "preview", &confidence_value, 255, on_confidence_changed);
-    cv::setMouseCallback("preview", onMouse);
-
-    if (opt.raw) {
-        for (; raw_loop(tof, preview_ptr);) {
-        }
-    } else {
-        cv::namedWindow("amplitude", cv::WINDOW_NORMAL);
-        for (; depth_loop(tof, preview_ptr);) {
-        }
-    }
-
-    delete[] preview_ptr;
-
-    if (tof.stop()) {
-        fprintf(stderr, "stop camera failed\n");
-    }
-    if (tof.close()) {
-        fprintf(stderr, "close camera failed\n");
-    }
-    return 0;
+    return true;
 }
+
+/* #endregion */

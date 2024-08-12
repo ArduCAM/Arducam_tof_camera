@@ -75,6 +75,36 @@ Clone this repository and enter the directory.
   ./capture_raw
 ```
 
+#### PCL Examples
+
+##### Dependencies
+
+```Shell
+  sudo apt update
+  sudo apt-get install build-essential cmake 
+  sudo apt-get install libopencv-dev libpcl-dev
+```
+
+##### Compile
+
+> Run in the Arducam_tof_camera folder
+
+```shell
+  ./compile_pcl.sh
+```
+
+##### Run
+
+> Run in the build/pcl_preview folder
+
+```shell
+  cd build/pcl_preview
+```
+
+```shell
+  ./preview_pointcloud
+```
+
 #### Python Examples
 
 ##### Run

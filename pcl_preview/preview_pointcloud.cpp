@@ -103,12 +103,10 @@ int main(int argc, char* argv[])
             tof.setControl(CameraCtrl::FMT_WIDTH, 640);
             tof.setControl(CameraCtrl::FMT_HEIGHT, 480);
             tof.setControl(CameraCtrl::MODE, to_int(TofWorkMode::DOUBLE_FREQ));
-            tof.setControl(CameraCtrl::FRAME_MODE, to_int(TofFrameWorkMode::DOUBLE_FREQ_4PHASE_GRAY_4PHASE_BG));
         } else {
             tof.setControl(CameraCtrl::FMT_WIDTH, 640);
             tof.setControl(CameraCtrl::FMT_HEIGHT, 480);
             tof.setControl(CameraCtrl::MODE, to_int(TofWorkMode::SINGLE_FREQ));
-            tof.setControl(CameraCtrl::FRAME_MODE, to_int(TofFrameWorkMode::SINGLE_FREQ_4PHASE_GRAY));
         }
     }
 
@@ -150,10 +148,8 @@ int main(int argc, char* argv[])
             max_height = format.height;
             max_width = format.width;
 
-            constexpr auto max_width = 640;
-            constexpr auto max_height = 480;
-            constexpr float fx = max_width / (2 * tan(0.5 * M_PI * 64.3 / 180));  // 640 / 2 / tan(0.5*64.3)
-            constexpr float fy = max_height / (2 * tan(0.5 * M_PI * 50.4 / 180)); // 480 / 2 / tan(0.5*50.4)
+            float fx = max_width / (2 * tan(0.5 * M_PI * 64.3 / 180));  // 640 / 2 / tan(0.5*64.3)
+            float fy = max_height / (2 * tan(0.5 * M_PI * 50.4 / 180)); // 480 / 2 / tan(0.5*50.4)
             // const float fx = 509.128;
             // const float fy = 509.334;
             // getPreview(preview_ptr, depth_ptr, amplitude_ptr);
@@ -172,7 +168,7 @@ int main(int argc, char* argv[])
             unsigned long int pos = 0;
             for (int row_idx = 0; row_idx < max_height; row_idx++)
                 for (int col_idx = 0; col_idx < max_width; col_idx++, pos++) {
-                    if (amplitude_ptr[pos] > confidence_value) {
+                    if (amplitude_ptr[pos] >= confidence_value) {
                         float zz = depth_ptr[pos];
                         float xx = ((((max_width / 2) - col_idx)) / fx) * zz;
                         float yy = (((max_height / 2) - row_idx) / fy) * zz;

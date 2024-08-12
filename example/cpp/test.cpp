@@ -1,5 +1,6 @@
 #include "ArducamTOFCamera.hpp"
 #include <chrono>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <opencv2/core.hpp>
@@ -22,6 +23,8 @@ int max_height = 180;
 
 struct opt_data {
     bool raw = false;
+    bool no_preview = false;
+    bool no_confidence = false;
     bool no_amplitude = false;
     int device = 0;
     int mode = -1;
@@ -90,8 +93,12 @@ LOCAL void display_fps(void)
     } else if (count == 1) {
         avg_duration = cost_ms;
     } else {
-        avg_duration = avg_duration * (1 - alpha) + cost_ms * alpha;
-        alpha = 1. / (2000. / avg_duration);
+        float t = avg_duration * (1 - alpha) + cost_ms * alpha;
+        if (std::isfinite(t)) {
+            avg_duration = t;
+            alpha = 1. / (2000. / t);
+            alpha = std::min(1.F / 30, std::max(1.F / 1, alpha));
+        }
     }
 
     ++count;
@@ -178,7 +185,7 @@ LOCAL bool checkExit()
     return true;
 }
 
-LOCAL bool processKey(void* data, bool depth = true)
+LOCAL bool processKey(void* data, void* data2 = nullptr)
 {
     int key = cv::waitKey(1);
     switch (key) {
@@ -186,10 +193,11 @@ LOCAL bool processKey(void* data, bool depth = true)
     case 'q':
         return false;
     case 's':
-        if (depth) {
-            saveData(data, max_width, max_height, "depth", DType::f32);
-        } else {
+        if (data2 == nullptr) {
             saveData(data, max_width, max_height, "raw", DType::u16);
+        } else {
+            saveData(data, max_width, max_height, "depth", DType::f32);
+            saveData(data2, max_width, max_height, "confidence", DType::f32);
         }
         break;
     default:
@@ -245,9 +253,10 @@ LOCAL bool raw_loop(Arducam::ArducamTOFCamera& tof, const opt_data& data)
     cv::Mat raw_frame(format.height, format.width, CV_16U, raw_data);
 
     raw_frame.convertTo(result_frame, CV_8U, 1. / (1 << 4), 0);
-    cv::imshow("preview", result_frame);
-
-    if (!processKey(raw_data, false)) {
+    if (!data.no_preview) {
+        cv::imshow("preview", result_frame);
+    }
+    if (!processKey(raw_data)) {
         return false;
     }
     display_fps();
@@ -302,15 +311,18 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, const opt_data& data)
     cv::rectangle(result_frame, seletRect, cv::Scalar(0, 0, 0), 2);
     cv::rectangle(result_frame, followRect, cv::Scalar(255, 255, 255), 1);
 
-    cv::imshow("preview", result_frame);
-    cv::imshow("confidence", confidence_frame);
+    if (!data.no_preview) {
+        cv::imshow("preview", result_frame);
+        std::cout << "select Rect distance: " << cv::mean(depth_frame(seletRect)).val[0] << std::endl;
+    }
+    if (!data.no_confidence) {
+        cv::imshow("confidence", confidence_frame);
+    }
     if (!data.no_amplitude) {
         cv::imshow("amplitude", amplitude_frame);
     }
 
-    std::cout << "select Rect distance: " << cv::mean(depth_frame(seletRect)).val[0] << std::endl;
-
-    if (!processKey(depth_ptr)) {
+    if (!processKey(depth_ptr, confidence_ptr)) {
         return false;
     }
     display_fps();
@@ -422,20 +434,23 @@ int main(int argc, char* argv[])
         opt.max_range = max_range;
     }
 
-    cv::namedWindow("preview", cv::WINDOW_NORMAL);
-    cv::setMouseCallback("preview", onMouse);
+    if (!opt.no_preview) {
+        cv::namedWindow("preview", cv::WINDOW_NORMAL);
+        cv::setMouseCallback("preview", onMouse);
 
-    if (info.device_type == Arducam::DeviceType::DEVICE_VGA) {
-        // only vga support confidence
-        cv::createTrackbar("confidence", "preview", &confidence_value, 255, on_confidence_changed);
+        if (info.device_type == Arducam::DeviceType::DEVICE_VGA) {
+            // only vga support confidence
+            cv::createTrackbar("confidence", "preview", &confidence_value, 255, on_confidence_changed);
+        }
     }
-    cv::setMouseCallback("preview", onMouse);
 
     if (opt.raw) {
         for (; raw_loop(tof, opt);) {
         }
     } else {
-        cv::namedWindow("confidence", cv::WINDOW_NORMAL);
+        if (!opt.no_confidence) {
+            cv::namedWindow("confidence", cv::WINDOW_NORMAL);
+        }
         if (!opt.no_amplitude) {
             cv::namedWindow("amplitude", cv::WINDOW_NORMAL);
         }
@@ -461,7 +476,9 @@ void help(int argc, char* argv[])
     std::cout << "  -v,--version        Display the version of the program" << std::endl;
     std::cout << "  -d,--device NUM     Set the device number" << std::endl;
     std::cout << "  --raw/--depth       Display the raw or depth frame" << std::endl;
-    std::cout << "  -A,--no-amplitude   Display the depth frame without amplitude" << std::endl;
+    std::cout << "  -P,--no-preview     Do not display the preview" << std::endl;
+    std::cout << "  -C,--no-confidence  Do not display the confidence" << std::endl;
+    std::cout << "  -A,--no-amplitude   Do not display the amplitude" << std::endl;
     std::cout << "  --fps FPS           Set the fps of the camera" << std::endl;
     std::cout << "  --mode MODE         Set the mode of the camera" << std::endl;
     std::cout << "      0               320 * 240 with single frequency" << std::endl;
@@ -480,6 +497,8 @@ enum class ArgEnum {
     device,
     raw,
     depth,
+    no_preview,
+    no_confidence,
     no_amplitude,
     fps,
     mode,
@@ -501,6 +520,12 @@ template <ArgEnum arg_enum> LOCAL const char* to_str()
         return "raw";
     case ArgEnum::depth:
         return "depth";
+    case ArgEnum::no_preview:
+        return "no-preview";
+    case ArgEnum::no_confidence:
+        return "no-confidence";
+    case ArgEnum::no_amplitude:
+        return "no-amplitude";
     case ArgEnum::fps:
         return "fps";
     case ArgEnum::mode:
@@ -554,6 +579,12 @@ template <ArgEnum arg_enum> LOCAL int __parse_opt(int argc, char* argv[], int cu
     } break;
     case ArgEnum::depth: {
         data.raw = false;
+    } break;
+    case ArgEnum::no_preview: {
+        data.no_preview = true;
+    } break;
+    case ArgEnum::no_confidence: {
+        data.no_confidence = true;
     } break;
     case ArgEnum::no_amplitude: {
         data.no_amplitude = true;
@@ -658,6 +689,8 @@ LOCAL int __parse_opt(int argc, char* argv[], int curr, opt_data& data)
                 // SHORT('r', ArgEnum::raw)
                 SHORT('h', ArgEnum::help)
                 SHORT('v', ArgEnum::version)
+                SHORT('P', ArgEnum::no_preview)
+                SHORT('C', ArgEnum::no_confidence)
                 SHORT('A', ArgEnum::no_amplitude)
                 SHORT_END('d', ArgEnum::device)
                 SHORT_END('m', ArgEnum::min_range)
@@ -673,6 +706,8 @@ LOCAL int __parse_opt(int argc, char* argv[], int curr, opt_data& data)
         LONG("cfg", ArgEnum::cfg)
         LONG("raw", ArgEnum::raw)
         LONG("depth", ArgEnum::depth)
+        LONG("no-preview", ArgEnum::no_preview)
+        LONG("no-confidence", ArgEnum::no_confidence)
         LONG("no-amplitude", ArgEnum::no_amplitude)
         LONG("min-range", ArgEnum::min_range)
         LONG("max-range", ArgEnum::max_range)
@@ -704,6 +739,10 @@ LOCAL bool parse_opt(int argc, char* argv[], opt_data& opt)
     }
 
     // check
+    if (opt.no_confidence && opt.raw) {
+        std::cerr << "Invalid option: --no-confidence and --raw are exclusive" << std::endl;
+        return false;
+    }
     if (opt.no_amplitude && opt.raw) {
         std::cerr << "Invalid option: --no-amplitude and --raw are exclusive" << std::endl;
         return false;

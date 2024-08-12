@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.4)
+
 project(PreviewPointcloud)
+
 add_compile_options(-Wno-psabi)
 find_package(PCL QUIET COMPONENTS common io visualization)
 find_package(OpenCV REQUIRED)
 
-set(CORE_LIBS ArducamDepthCamera ${PCL_LIBRARIES})
+set(CORE_LIBS ${CXXLIBS} ${PCL_LIBRARIES})
 
 set(WITH_OPENCV_WORLD OFF CACHE BOOL "with opencv_world")
 if(WITH_OPENCV_WORLD)

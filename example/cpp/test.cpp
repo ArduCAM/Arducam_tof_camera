@@ -332,8 +332,9 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, const opt_data& data)
 
 #define check(expr, err_msg)                                                                                           \
     do {                                                                                                               \
-        if (expr) {                                                                                                    \
-            std::cerr << err_msg << std::endl;                                                                         \
+        Arducam::TofErrorCode ret = (expr);                                                                            \
+        if (ret != Arducam::TofErrorCode::ArducamSuccess) {                                                                          \
+            std::cerr << err_msg << ": " << to_str(ret) << std::endl;                                                  \
             return -1;                                                                                                 \
         }                                                                                                              \
     } while (0)

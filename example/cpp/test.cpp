@@ -304,8 +304,8 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, const opt_data& data)
     result_frame.setTo(cv::Scalar(0, 0, 0), depth_frame < min_range);
     getPreviewRGB(result_frame, confidence_frame);
 
-    // confidence_frame.convertTo(confidence_frame, CV_8U, 255.0 / max_range, 0);
-    cv::normalize(confidence_frame, confidence_frame, 1, 0, cv::NORM_MINMAX);
+    confidence_frame.convertTo(confidence_frame, CV_32F, 1 / 255.0, 0);
+    // cv::normalize(confidence_frame, confidence_frame, 1, 0, cv::NORM_MINMAX);
     cv::normalize(amplitude_frame, amplitude_frame, 1, 0, cv::NORM_MINMAX);
 
     cv::rectangle(result_frame, seletRect, cv::Scalar(0, 0, 0), 2);
@@ -333,7 +333,7 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, const opt_data& data)
 #define check(expr, err_msg)                                                                                           \
     do {                                                                                                               \
         Arducam::TofErrorCode ret = (expr);                                                                            \
-        if (ret != Arducam::TofErrorCode::ArducamSuccess) {                                                                          \
+        if (ret != Arducam::TofErrorCode::ArducamSuccess) {                                                            \
             std::cerr << err_msg << ": " << to_str(ret) << std::endl;                                                  \
             return -1;                                                                                                 \
         }                                                                                                              \

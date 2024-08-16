@@ -136,7 +136,6 @@ LOCAL void getPreview(uint8_t* preview_ptr, float* phase_image_ptr, float* confi
 
 LOCAL void getPreview(cv::Mat preview_ptr, cv::Mat confidence_image_ptr)
 {
-    auto len = preview_ptr.rows * preview_ptr.cols;
     for (int line = 0; line < preview_ptr.rows; line++) {
         for (int col = 0; col < preview_ptr.cols; col++) {
             if (confidence_image_ptr.at<float>(line, col) < confidence_value)

@@ -1,21 +1,34 @@
 #!/bin/sh
 
 FIND_FILE=""
+HAS_DTOVERLAY="true"
 if [ -f "/boot/firmware/config.txt" ]; then # Bookworm
     FIND_FILE="/boot/firmware/config.txt"
     if [ $(grep -c -e '^dtoverlay=arducam-pivariety,media-controller=0' $FIND_FILE) -lt '1' ]; then
-        echo "dtoverlay=arducam-pivariety,media-controller=0" | sudo tee -a $FIND_FILE
+        HAS_DTOVERLAY="false"
     fi
 elif [ -f "/boot/config.txt" ]; then # Bullseye and earlier
     FIND_FILE="/boot/config.txt"
     if [ $(grep -c -e '^dtoverlay=arducam-pivariety,media-controller=0' $FIND_FILE) -lt '1' ]; then
-        echo "dtoverlay=arducam-pivariety,media-controller=0" | sudo tee -a $FIND_FILE
+        HAS_DTOVERLAY="false"
     fi
 fi
 
 if [ "$FIND_FILE" = "" ]; then
     echo "No config.txt file found."
     exit 1
+fi
+
+if [ "$HAS_DTOVERLAY" = "false" ]; then
+    # remove all line which has dtoverlay=arducam-pivariety
+    sudo sed -i '/dtoverlay=arducam-pivariety/d' $FIND_FILE
+    echo "dtoverlay=arducam-pivariety,media-controller=0" | sudo tee -a $FIND_FILE
+    # if "Raspberry Pi 5" in `cat /sys/firmware/devicetree/base/model`
+    if [ -f /sys/firmware/devicetree/base/model ]; then
+        if grep -q "Raspberry Pi 5" /sys/firmware/devicetree/base/model; then
+            echo "dtoverlay=arducam-pivariety,cam0,media-controller=0" | sudo tee -a $FIND_FILE
+        fi
+    fi
 fi
 
 if [ $(grep -c "camera_auto_detect=1" $FIND_FILE) -ne '0' ]; then

@@ -18,8 +18,10 @@ using namespace std::literals;
 
 cv::Rect seletRect(0, 0, 0, 0);
 cv::Rect followRect(0, 0, 0, 0);
+int sel_range = 4;
 int max_width = 240;
 int max_height = 180;
+int confidence_value = 30;
 
 struct opt_data {
     bool raw = false;
@@ -40,10 +42,27 @@ enum class DType {
     u16,
 };
 
-int confidence_value = 30;
 void on_confidence_changed(int pos, void* userdata)
 {
     //
+}
+void on_min_range_changed(int pos, void* userdata)
+{
+    opt_data& opt = *(opt_data*)userdata;
+    opt.min_range = pos;
+    if (opt.min_range > opt.max_range) {
+        opt.max_range = opt.min_range;
+        cv::setTrackbarPos("max-range", "preview", opt.max_range);
+    }
+}
+void on_max_range_changed(int pos, void* userdata)
+{
+    opt_data& opt = *(opt_data*)userdata;
+    opt.max_range = pos;
+    if (opt.max_range < opt.min_range) {
+        opt.min_range = opt.max_range;
+        cv::setTrackbarPos("min-range", "preview", opt.min_range);
+    }
 }
 
 LOCAL const char* to_str(DType type)
@@ -150,8 +169,8 @@ LOCAL void getPreviewRGB(cv::Mat preview_ptr, cv::Mat confidence_image_ptr)
     // cv::GaussianBlur(preview_ptr, preview_ptr, cv::Size(7, 7), 0);
 }
 
-LOCAL void saveData(void* data, unsigned int width, unsigned int height, const char* prefix = "depth",
-                    DType d_type = DType::f32)
+LOCAL std::string saveData(void* data, unsigned int width, unsigned int height, const char* prefix = "depth",
+                           DType d_type = DType::f32)
 {
     using std::to_string;
     using std::chrono::system_clock;
@@ -164,18 +183,38 @@ LOCAL void saveData(void* data, unsigned int width, unsigned int height, const c
     // save data
     auto file = std::ofstream(filename, std::ios::binary);
     if (!file.is_open()) {
-        std::cerr << "save depth failed" << std::endl;
-        return;
+        std::cerr << "save data failed" << std::endl;
+        return "";
     }
     file.write(reinterpret_cast<char*>(data), width * height * to_size(d_type));
     file.close();
 
-    std::cout << "save depth to " << filename << std::endl;
+    std::cout << "save data to " << filename << std::endl;
+    return filename;
+}
+
+LOCAL std::string appendData(void* data, unsigned int width, unsigned int height, const std::string& filename,
+                             DType d_type = DType::f32)
+{
+    using std::to_string;
+    using std::chrono::system_clock;
+    using namespace std::literals;
+    // save data
+    auto file = std::ofstream(filename, std::ios::app | std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "append data failed" << std::endl;
+        return "";
+    }
+    file.write(reinterpret_cast<char*>(data), width * height * to_size(d_type));
+    file.close();
+
+    std::cout << "append data to " << filename << std::endl;
+    return filename;
 }
 
 LOCAL bool checkExit()
 {
-    int key = cv::waitKey(1);
+    int key = cv::waitKey(500);
     switch (key) {
     case 27:
     case 'q':
@@ -186,6 +225,7 @@ LOCAL bool checkExit()
 
 LOCAL bool processKey(void* data, void* data2 = nullptr)
 {
+    static std::string last_filename;
     int key = cv::waitKey(1);
     switch (key) {
     case 27:
@@ -193,12 +233,20 @@ LOCAL bool processKey(void* data, void* data2 = nullptr)
         return false;
     case 's':
         if (data2 == nullptr) {
-            saveData(data, max_width, max_height, "raw", DType::u16);
+            last_filename = saveData(data, max_width, max_height, "raw", DType::u16);
         } else {
             saveData(data, max_width, max_height, "depth", DType::f32);
             saveData(data2, max_width, max_height, "confidence", DType::f32);
         }
         break;
+    case 'r':
+        if (data2 == nullptr) {
+            if (last_filename.empty()) {
+                last_filename = saveData(data, max_width, max_height, "raw", DType::u16);
+            } else {
+                last_filename = appendData(data, max_width, max_height, last_filename, DType::u16);
+            }
+        }
     default:
         break;
     }
@@ -207,24 +255,24 @@ LOCAL bool processKey(void* data, void* data2 = nullptr)
 
 void onMouse(int event, int x, int y, int flags, void* param)
 {
-    if (x < 4 || x > (max_width - 4) || y < 4 || y > (max_height - 4))
+    const auto r = sel_range;
+    if (x < r || x > (max_width - r) || y < r || y > (max_height - r))
         return;
     switch (event) {
     case cv::EVENT_LBUTTONDOWN:
-
         break;
 
     case cv::EVENT_LBUTTONUP:
-        seletRect.x = x - 4;
-        seletRect.y = y - 4;
-        seletRect.width = 8;
-        seletRect.height = 8;
+        seletRect.x = x - r;
+        seletRect.y = y - r;
+        seletRect.width = 2 * r;
+        seletRect.height = 2 * r;
         break;
     default:
-        followRect.x = x - 4;
-        followRect.y = y - 4;
-        followRect.width = 8;
-        followRect.height = 8;
+        followRect.x = x - r;
+        followRect.y = y - r;
+        followRect.width = 2 * r;
+        followRect.height = 2 * r;
         break;
     }
 }
@@ -279,13 +327,19 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, const opt_data& data)
     if (1000000000000UL <= format.timestamp && format.timestamp <= 9000000000000UL) {
         // a timestamp in milliseconds (13 digits)
         uint64_t now = std::chrono::system_clock::now().time_since_epoch() / 1ms;
-        printf("timestamp: %lu, now: %lu, diff: %lums\n", format.timestamp, now, now - format.timestamp);
+        printf("timestamp: %llu, now: %llu, diff: %llums\n", (long long unsigned)format.timestamp,
+               (long long unsigned)now, (long long unsigned)(now - format.timestamp));
     } else if (1000000000UL <= format.timestamp && format.timestamp <= 9000000000UL) {
         // a timestamp in seconds (10 digits)
         uint64_t now = std::chrono::system_clock::now().time_since_epoch() / 1s;
-        printf("timestamp: %lu, now: %lu, diff: %lus\n", format.timestamp, now, now - format.timestamp);
+        printf("timestamp: %llu, now: %llu, diff: %llus\n", (long long unsigned)format.timestamp,
+               (long long unsigned)now, (long long unsigned)(now - format.timestamp));
     } else {
         // invalid timestamp from epoch
+        // with mono timestamp
+        uint64_t now = std::chrono::steady_clock::now().time_since_epoch() / 1ms;
+        printf("timestamp: %llu, now: %llu, diff: %llums\n", (long long unsigned)format.timestamp,
+               (long long unsigned)now, (long long unsigned)(now - format.timestamp));
     }
     float* depth_ptr = (float*)frame->getData(FrameType::DEPTH_FRAME);
     float* amplitude_ptr = (float*)frame->getData(FrameType::AMPLITUDE_FRAME);
@@ -312,7 +366,8 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, const opt_data& data)
 
     if (!data.no_preview) {
         cv::imshow("preview", result_frame);
-        std::cout << "select Rect distance: " << cv::mean(depth_frame(seletRect)).val[0] << std::endl;
+        std::cout << "select Rect distance: " << cv::mean(depth_frame(seletRect)).val[0] << "mm, pos: " << seletRect
+                  << std::endl;
     }
     if (!data.no_confidence) {
         cv::imshow("confidence", confidence_frame);
@@ -411,13 +466,17 @@ int main(int argc, char* argv[])
     }
 
     if (opt.fps != -1) {
-        int max_fps = 0;
-        tof.getControl(CameraCtrl::FRAME_RATE, &max_fps);
-        if (opt.fps > max_fps) {
-            std::cerr << "Invalid fps: " << opt.fps << ", max fps: " << max_fps << std::endl;
-            return -1;
+        if (opt.fps != 0) {
+            int max_fps = 0;
+            tof.getControl(CameraCtrl::FRAME_RATE, &max_fps);
+            if (opt.fps > max_fps) {
+                std::cerr << "Invalid fps: " << opt.fps << ", max fps: " << max_fps << std::endl;
+                return -1;
+            }
+            set_ctl(FRAME_RATE, opt.fps);
         }
-        tof.setControl(CameraCtrl::FRAME_RATE, opt.fps);
+        // disable auto frame rate if the camera has the control
+        (void)tof.setControl(CameraCtrl::AUTO_FRAME_RATE, 0);
     }
 
     // int rang = 0;
@@ -437,6 +496,9 @@ int main(int argc, char* argv[])
     if (!opt.no_preview) {
         cv::namedWindow("preview", cv::WINDOW_NORMAL);
         cv::setMouseCallback("preview", onMouse);
+
+        cv::createTrackbar("min-range", "preview", NULL, 6000, on_min_range_changed, &opt);
+        cv::createTrackbar("max-range", "preview", NULL, 6000, on_max_range_changed, &opt);
 
         if (info.device_type == Arducam::DeviceType::DEVICE_VGA) {
             // only vga support confidence

@@ -93,6 +93,12 @@ Clone this repository and enter the directory.
   ./compile_pcl.sh
 ```
 
+> Run the setup_rock_5a.sh if on rock 5a platform.
+
+```shell
+  ./setup_rock_5a.sh
+```
+
 ##### Run
 
 > Run in the build/pcl_preview folder

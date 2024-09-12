@@ -35,9 +35,16 @@ source ~/.bashrc
   cd Arducam_tof_camera/ros2_publisher
   colcon build --merge-install 
 ```
-#### Run
+#### Run C++ examples
 ```Shell
   . install/setup.bash 
-  ros2 run arducam tof_pointcloud
+  ros2 run arducam_rclcpp_tof_pointcloud tof_pointcloud
 ```
+
+#### Run Python examples
+```shell
+  . install/setup.bash 
+  ros2 run arducam_rclpy_tof_pointcloud tof_pointcloud
+```
+
 >You can preview by running rviz2 on the host in the LAN

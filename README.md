@@ -26,6 +26,12 @@ Clone this repository and enter the directory.
   ./Install_dependencies.sh
 ```
 
+> Run the setup_rock_5a.sh if on rock 5a platform.
+
+```shell
+  ./setup_rock_5a.sh
+```
+
 ### Install dependencies for Jetson
 
 > Run in the Arducam_tof_camera folder
@@ -35,9 +41,31 @@ Clone this repository and enter the directory.
   ./Install_dependencies_jetson.sh
 ```
 
-### Run the examples on Raspberry Pi or Jetson
+## Run Examples
 
-#### C/C++ Examples
+> Platform: Raspberry Pi or Jetson
+
+### Depth Examples
+
+#### Python
+
+##### Run
+
+###### Python Example
+
+> Run in the example/python folder
+
+```shell
+  cd example/python
+```
+
+```shell
+  python3 preview_depth.py
+  #or
+  python3 capture_raw.py
+```
+
+#### C/C++
 
 ##### Compile
 
@@ -75,14 +103,17 @@ Clone this repository and enter the directory.
   ./capture_raw
 ```
 
-#### PCL Examples
+### Point Cloud Examples
+
+<!-- #### Python -->
+
+#### C/C++
 
 ##### Dependencies
 
 ```Shell
   sudo apt update
-  sudo apt-get install build-essential cmake 
-  sudo apt-get install libopencv-dev libpcl-dev
+  sudo apt-get install libopen3d-dev 
 ```
 
 ##### Compile
@@ -90,41 +121,17 @@ Clone this repository and enter the directory.
 > Run in the Arducam_tof_camera folder
 
 ```shell
-  ./compile_pcl.sh
-```
-
-> Run the setup_rock_5a.sh if on rock 5a platform.
-
-```shell
-  ./setup_rock_5a.sh
+  ./compile_pointcloud.sh
 ```
 
 ##### Run
 
-> Run in the build/pcl_preview folder
+> Run in the build/open3d_preview folder
 
 ```shell
-  cd build/pcl_preview
+  cd build/open3d_preview
 ```
 
 ```shell
   ./preview_pointcloud
-```
-
-#### Python Examples
-
-##### Run
-
-###### Python Example
-
-> Run in the example/python folder
-
-```shell
-  cd example/python
-```
-
-```shell
-  python3 preview_depth.py
-  #or
-  python3 capture_raw.py
 ```

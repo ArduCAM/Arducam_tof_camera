@@ -108,13 +108,34 @@ void onMouse(int event, int x, int y, int flags, void* param)
     }
 }
 
-int main()
+bool getControl(ArducamTOFCamera& tof, Arducam::CameraCtrl mode, float& val, float alpha = 1.0)
+{
+    int tmp = 0;
+    Arducam::TofErrorCode ret = tof.getControl(mode, &tmp);
+    if (ret != 0) {
+        std::cerr << "Failed to get control" << std::endl;
+        return false;
+    }
+    val = tmp / alpha;
+    return true;
+}
+
+int main(int argc, char* argv[])
 {
     ArducamTOFCamera tof;
     ArducamFrameBuffer* frame;
-    if (tof.open(Connection::CSI, 0)) {
-        std::cerr << "Failed to open camera" << std::endl;
-        return -1;
+
+    if (argc > 1) {
+        const char* cfg_path = argv[1];
+        if (tof.openWithFile(cfg_path)) {
+            std::cerr << "Failed to open camera with cfg: " << cfg_path << std::endl;
+            return -1;
+        }
+    } else {
+        if (tof.open(Connection::CSI)) {
+            std::cerr << "Failed to open camera" << std::endl;
+            return -1;
+        }
     }
 
     if (tof.start(FrameType::DEPTH_FRAME)) {
@@ -128,17 +149,21 @@ int main()
     std::cout << "open camera with (" << info.width << "x" << info.height << ")" << std::endl;
 
     uint8_t* preview_ptr = new uint8_t[info.width * info.height * 2];
-    cv::namedWindow("preview", cv::WINDOW_AUTOSIZE);
+    cv::namedWindow("preview", cv::WINDOW_NORMAL);
     cv::setMouseCallback("preview", onMouse);
     // if (info.device_type == Arducam::DeviceType::DEVICE_VGA) {
     //     // only vga support confidence
     //     cv::createTrackbar("confidence", "preview", NULL, 255, on_confidence_changed);
     // }
 
-    float fx = max_width / (2 * tan(0.5 * M_PI * 64.3 / 180));  // 640 / 2 / tan(0.5*64.3)
-    float fy = max_height / (2 * tan(0.5 * M_PI * 50.4 / 180)); // 480 / 2 / tan(0.5*50.4)
-    float cx = max_width / 2;
-    float cy = max_height / 2;
+    float fx, fy, cx, cy;
+
+    getControl(tof, CameraCtrl::INTRINSIC_FX, fx, 100);
+    getControl(tof, CameraCtrl::INTRINSIC_FY, fy, 100);
+    getControl(tof, CameraCtrl::INTRINSIC_CX, cx, 100);
+    getControl(tof, CameraCtrl::INTRINSIC_CY, cy, 100);
+
+    std::cout << "fx: " << fx << " fy: " << fy << " cx: " << cx << " cy: " << cy << std::endl;
 
     Eigen::Matrix4d m = Eigen::Matrix4d::Identity();
     m << 1, 0, 0, 0, 
@@ -195,9 +220,14 @@ int main()
 
         memcpy(depth_image.data_.data(), depth_frame.data, depth_image.data_.size());
 
-        auto curr_pcd = open3d::geometry::PointCloud::CreateFromDepthImage(
-                depth_image, camera_intrinsic, Eigen::Matrix4d::Identity(), 5000.0, 5000.0);
-        
+        getControl(tof, CameraCtrl::INTRINSIC_FX, fx, 100);
+        getControl(tof, CameraCtrl::INTRINSIC_FY, fy, 100);
+        getControl(tof, CameraCtrl::INTRINSIC_CX, cx, 100);
+        getControl(tof, CameraCtrl::INTRINSIC_CY, cy, 100);
+
+        auto curr_pcd = open3d::geometry::PointCloud::CreateFromDepthImage( //
+            depth_image, {max_width, max_height, fx, fy, cx, cy}, Eigen::Matrix4d::Identity(), 1000.0, 5000.0);
+
         // memcpy(pcd->points_.data(), curr_pcd->points_.data(), pcd->points_.size());
         pcd->points_ = curr_pcd->points_;
 
@@ -220,6 +250,13 @@ int main()
         if (key == 27 || key == 'q') {
             break;
         } else if (key == 's') {
+            open3d::io::WritePointCloudToPCD( //
+                "pointcloud.pcd", *pcd,
+                {
+                    open3d::io::WritePointCloudOption::IsAscii::Ascii,
+                    open3d::io::WritePointCloudOption::Compressed::Uncompressed,
+                });
+        } else if (key == 'r') {
             save_image(depth_ptr, format.width, format.height);
         }
         display_fps();

@@ -127,6 +127,7 @@ Clone this repository and enter the directory.
 ##### Run
 
 > Run in the build/open3d_preview folder
+> If you do not see a point cloud window, please try adding the environment variable `export MESA_GL_VERSION_OVERRIDE=4.5` before running the program.
 
 ```shell
   cd build/open3d_preview

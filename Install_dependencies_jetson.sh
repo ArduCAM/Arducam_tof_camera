@@ -8,7 +8,7 @@ if ! sudo apt install -y cmake curl python3-pip python3-opencv python3-numpy >/d
     exit 1
 fi
 
-if [ $(dpkg -l | grep -c arducam) -lt 1 ]; then
+if [ $(dpkg -l | grep -c arducam-tof-sdk-dev) -lt 1 ]; then
     echo "Add Arducam_ppa repositories."
     curl -s --compressed "https://arducam.github.io/arducam_ppa/KEY.gpg" | sudo apt-key add -
     sudo curl -s --compressed -o /etc/apt/sources.list.d/arducam_list_files.list "https://arducam.github.io/arducam_ppa/arducam_list_files.list"

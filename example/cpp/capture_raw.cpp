@@ -50,8 +50,8 @@ int main()
     }
     //  Modify the range also to modify the MAX_DISTANCE
     int max_range = 4000;
-    // tof.setControl(CameraCtrl::RANGE, 4000);
-    tof.getControl(CameraCtrl::RANGE, &max_range);
+    // tof.setControl(Control::RANGE, 4000);
+    tof.getControl(Control::RANGE, &max_range);
 
     CameraInfo info = tof.getCameraInfo();
     std::cout << "open camera with (" << info.width << "x" << info.height << ") with range " << max_range << std::endl;
@@ -63,8 +63,8 @@ int main()
         if (frame == nullptr) {
             continue;
         }
-        FrameDataFormat format;
-        frame->getFrameDataFormat(FrameType::RAW_FRAME, format);
+        FrameFormat format;
+        frame->getFormat(FrameType::RAW_FRAME, format);
         std::cout << "frame: (" << format.width << "x" << format.height << ")" << std::endl;
 
         int16_t* raw_ptr = (int16_t*)frame->getData(FrameType::RAW_FRAME);

@@ -8,13 +8,20 @@ import numpy as np
 from threading import Thread
 
 
-from ArducamDepthCamera import (ArducamCamera, TOFConnect, TOFDeviceType, 
-                                TOFOutput, TOFControl, DepthData, ArducamInfo)
+from ArducamDepthCamera import (
+    ArducamCamera,
+    CameraInfo,
+    Connection,
+    DeviceType,
+    FrameType,
+    Control,
+    DepthData,
+)
+
 
 class TOFPublisher(Node):
-
-    def __init__(self, tof: ArducamCamera, camera_info: ArducamInfo):
-        super().__init__('arducam')
+    def __init__(self, tof: ArducamCamera, camera_info: CameraInfo):
+        super().__init__("arducam")
         self.tof_ = tof
         if camera_info.device_type == TOFDeviceType.HQVGA:
             self.width_ = camera_info.width
@@ -25,24 +32,28 @@ class TOFPublisher(Node):
         self.pointsize_ = self.width_ * self.height_
         self.frame_id = "sensor_frame"
         self.depth_msg_ = Float32MultiArray()
-        self.timer_ = self.create_timer(1/30, self.update)
+        self.timer_ = self.create_timer(1 / 30, self.update)
         self.publisher_ = self.create_publisher(PointCloud2, "point_cloud", 10)
-        self.publisher_depth_ = self.create_publisher(Float32MultiArray, "depth_frame", 10)
+        self.publisher_depth_ = self.create_publisher(
+            Float32MultiArray, "depth_frame", 10
+        )
         self.fx = self.width_ / (2 * tan(0.5 * pi * 64.3 / 180))
         self.fy = self.height_ / (2 * tan(0.5 * pi * 50.4 / 180))
         self.header = Header()
         self.header.frame_id = "map"
         self.points = None
         self.running_ = True
-        self.process_point_cloud_thr = Thread(target=self.__generateSensorPointCloud, daemon=True)
+        self.process_point_cloud_thr = Thread(
+            target=self.__generateSensorPointCloud, daemon=True
+        )
         self.process_point_cloud_thr.start()
 
     def __generateSensorPointCloud(self):
         while self.running_:
             frame = self.tof_.requestFrame(200)
             if frame is not None and isinstance(frame, DepthData):
-                depth_buf = frame.getDepthData()
-                confidence_buf = frame.getConfidenceData()
+                depth_buf = frame.depth_data
+                confidence_buf = frame.confidence_data
 
                 depth_buf[confidence_buf < 30] = 0
 
@@ -63,10 +74,12 @@ class TOFPublisher(Node):
 
                 # Combined point cloud
                 points = np.stack((x, y, z), axis=-1)
-                self.points = points[~np.isnan(points).any(axis=-1)]  # Filter invalid points
+                self.points = points[
+                    ~np.isnan(points).any(axis=-1)
+                ]  # Filter invalid points
 
                 self.tof_.releaseFrame(frame)
-    
+
     def update(self):
         # self.__generateSensorPointCloud()
         if self.points is None:
@@ -83,25 +96,25 @@ class TOFPublisher(Node):
         self.process_point_cloud_thr.join()
 
 
-def main(args = None):
+def main(args=None):
     rclpy.init(args=args)
     tof = ArducamCamera()
 
     ret = 0
-    ret = tof.open(TOFConnect.CSI, 0)
+    ret = tof.open(Connection.CSI, 0)
     if not ret:
         print("Failed to open camera. Error code:", ret)
         return
-    
-    ret = tof.start(TOFOutput.DEPTH)
+
+    ret = tof.start(FrameType.DEPTH)
     if ret != 0:
         print("Failed to start camera. Error code:", ret)
         tof.close()
         return
-    
+
     info = tof.getCameraInfo()
-    if info.device_type == TOFDeviceType.HQVGA:
-        tof.setControl(TOFControl.RANGE, 4)
+    if info.device_type == DeviceType.HQVGA:
+        tof.setControl(Control.RANGE, 4)
 
     print("pointcloud publisher start")
 

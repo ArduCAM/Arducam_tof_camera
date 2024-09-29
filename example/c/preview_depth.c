@@ -6,7 +6,7 @@ int main()
 {
     ArducamDepthCamera tof = createArducamDepthCamera();
     ArducamFrameBuffer frame;
-    if (arducamCameraOpen(tof, CSI, 0)) {
+    if (arducamCameraOpen(tof, CONNECTION_CSI, 0)) {
         printf("Failed to open camera\n");
         return -1;
     }

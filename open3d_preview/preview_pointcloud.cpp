@@ -108,7 +108,7 @@ void onMouse(int event, int x, int y, int flags, void* param)
     }
 }
 
-bool getControl(ArducamTOFCamera& tof, Arducam::CameraCtrl mode, float& val, float alpha = 1.0)
+bool getControl(ArducamTOFCamera& tof, Arducam::Control mode, float& val, float alpha = 1.0)
 {
     int tmp = 0;
     Arducam::TofErrorCode ret = tof.getControl(mode, &tmp);
@@ -143,8 +143,8 @@ int main(int argc, char* argv[])
         return -1;
     }
     //  Modify the range also to modify the MAX_DISTANCE
-    tof.setControl(CameraCtrl::RANGE, MAX_DISTANCE);
-    tof.getControl(CameraCtrl::RANGE, &max_range);
+    tof.setControl(Control::RANGE, MAX_DISTANCE);
+    tof.getControl(Control::RANGE, &max_range);
     auto info = tof.getCameraInfo();
     std::cout << "open camera with (" << info.width << "x" << info.height << ")" << std::endl;
 
@@ -158,10 +158,10 @@ int main(int argc, char* argv[])
 
     float fx, fy, cx, cy;
 
-    getControl(tof, CameraCtrl::INTRINSIC_FX, fx, 100);
-    getControl(tof, CameraCtrl::INTRINSIC_FY, fy, 100);
-    getControl(tof, CameraCtrl::INTRINSIC_CX, cx, 100);
-    getControl(tof, CameraCtrl::INTRINSIC_CY, cy, 100);
+    getControl(tof, Control::INTRINSIC_FX, fx, 100);
+    getControl(tof, Control::INTRINSIC_FY, fy, 100);
+    getControl(tof, Control::INTRINSIC_CX, cx, 100);
+    getControl(tof, Control::INTRINSIC_CY, cy, 100);
 
     std::cout << "fx: " << fx << " fy: " << fy << " cx: " << cx << " cy: " << cy << std::endl;
 
@@ -178,12 +178,12 @@ int main(int argc, char* argv[])
     bool first = true;
 
     for (;;) {
-        Arducam::FrameDataFormat format;
+        Arducam::FrameFormat format;
         frame = tof.requestFrame(200);
         if (frame == nullptr) {
             continue;
         }
-        frame->getFrameDataFormat(FrameType::DEPTH_FRAME, format);
+        frame->getFormat(FrameType::DEPTH_FRAME, format);
         std::cout << "frame: (" << format.width << "x" << format.height << ")" << std::endl;
         max_height = format.height;
         max_width = format.width;
@@ -220,10 +220,10 @@ int main(int argc, char* argv[])
 
         memcpy(depth_image.data_.data(), depth_frame.data, depth_image.data_.size());
 
-        getControl(tof, CameraCtrl::INTRINSIC_FX, fx, 100);
-        getControl(tof, CameraCtrl::INTRINSIC_FY, fy, 100);
-        getControl(tof, CameraCtrl::INTRINSIC_CX, cx, 100);
-        getControl(tof, CameraCtrl::INTRINSIC_CY, cy, 100);
+        getControl(tof, Control::INTRINSIC_FX, fx, 100);
+        getControl(tof, Control::INTRINSIC_FY, fy, 100);
+        getControl(tof, Control::INTRINSIC_CX, cx, 100);
+        getControl(tof, Control::INTRINSIC_CY, cy, 100);
 
         auto curr_pcd = open3d::geometry::PointCloud::CreateFromDepthImage( //
             depth_image, {max_width, max_height, fx, fy, cx, cy}, Eigen::Matrix4d::Identity(), 1000.0, 5000.0);

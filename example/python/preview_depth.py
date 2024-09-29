@@ -68,8 +68,12 @@ def usage(argv0):
 
 
 def main():
+    print("Arducam Depth Camera Demo.")
+    print("  SDK version:", ac.__version__)
+
     cam = ac.ArducamCamera()
-    cfg_path = None
+    cfg_path = "/home/user/Downloads/Configuration/SIF2618RM_Tof_4_Modes/SIF2618RM_Tof_4_Modes_MIPI_2Lane_RAW12_8b_640x4810.cfg"
+    # cfg_path = "/home/user/workspace/arducamusb3.0privariety/result/TOF/0_TOF_MIPI_2Lane_RAW12_8b_240x180_60FPS.cfg"
     black_color = (0, 0, 0)
     white_color = (255, 255, 255)
 
@@ -77,18 +81,18 @@ def main():
     if cfg_path is not None:
         ret = cam.openWithFile(cfg_path, 0)
     else:
-        ret = cam.open(ac.TOFConnect.CSI, 0)
+        ret = cam.open(ac.Connection.CSI, 0)
     if ret != 0:
         print("Failed to open camera. Error code:", ret)
         return
 
-    ret = cam.start(ac.TOFOutput.DEPTH)
+    ret = cam.start(ac.FrameType.DEPTH)
     if ret != 0:
         print("Failed to start camera. Error code:", ret)
         cam.close()
         return
 
-    r = cam.getControl(ac.TOFControl.RANGE)
+    r = cam.getControl(ac.Control.RANGE)
 
     info = cam.getCameraInfo()
     print(f"Camera resolution: {info.width}x{info.height}")
@@ -96,7 +100,7 @@ def main():
     cv2.namedWindow("preview", cv2.WINDOW_AUTOSIZE)
     cv2.setMouseCallback("preview", on_mouse)
 
-    if info.device_type == ac.TOFDeviceType.VGA:
+    if info.device_type == ac.DeviceType.VGA:
         # Only VGA support confidence
         cv2.createTrackbar(
             "confidence", "preview", confidence_value, 255, on_confidence_changed
@@ -105,8 +109,8 @@ def main():
     while True:
         frame = cam.requestFrame(2000)
         if frame is not None and isinstance(frame, ac.DepthData):
-            depth_buf = frame.getDepthData()
-            confidence_buf = frame.getConfidenceData()
+            depth_buf = frame.depth_data
+            confidence_buf = frame.confidence_data
 
             result_image = (depth_buf * (255.0 / r)).astype(np.uint8)
             result_image = cv2.applyColorMap(result_image, cv2.COLORMAP_RAINBOW)

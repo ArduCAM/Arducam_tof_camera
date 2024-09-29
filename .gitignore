@@ -12,3 +12,5 @@ build/
 /example/python/*.json
 
 *.patch
+/*.json
+/cali.bin

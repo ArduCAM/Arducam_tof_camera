@@ -271,8 +271,8 @@ LOCAL bool raw_loop(Arducam::ArducamTOFCamera& tof, opt_data& data)
     if (frame == nullptr) {
         return checkExit(data);
     }
-    Arducam::FrameDataFormat format;
-    frame->getFrameDataFormat(FrameType::RAW_FRAME, format);
+    Arducam::FrameFormat format;
+    frame->getFormat(FrameType::RAW_FRAME, format);
     std::cout << "frame: (" << format.width << "x" << format.height << "), time: " << format.timestamp << std::endl;
     data.max_height = format.height;
     data.max_width = format.width;
@@ -306,8 +306,8 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, opt_data& data)
     if (frame == nullptr) {
         return checkExit(data);
     }
-    Arducam::FrameDataFormat format;
-    frame->getFrameDataFormat(FrameType::DEPTH_FRAME, format);
+    Arducam::FrameFormat format;
+    frame->getFormat(FrameType::DEPTH_FRAME, format);
     std::cout << "frame: (" << format.width << "x" << format.height << "), time: " << format.timestamp << std::endl;
     data.max_height = format.height;
     data.max_width = format.width;
@@ -405,7 +405,7 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, opt_data& data)
         }                                                                                                              \
     } while (0)
 
-#define set_ctl_(tof, ctrl, val) check(tof.setControl(CameraCtrl::ctrl, val), "set control(" #ctrl ", " #val ") failed")
+#define set_ctl_(tof, ctrl, val) check(tof.setControl(Control::ctrl, val), "set control(" #ctrl ", " #val ") failed")
 #define set_ctl(ctrl, val)       set_ctl_(tof, ctrl, val)
 
 int main(int argc, char* argv[])
@@ -485,7 +485,7 @@ int main(int argc, char* argv[])
     if (opt.fps != -1) {
         if (opt.fps != 0) {
             int max_fps = 0;
-            tof.getControl(CameraCtrl::FRAME_RATE, &max_fps);
+            tof.getControl(Control::FRAME_RATE, &max_fps);
             if (opt.fps > max_fps) {
                 std::cerr << "Invalid fps: " << opt.fps << ", max fps: " << max_fps << std::endl;
                 return -1;
@@ -493,17 +493,17 @@ int main(int argc, char* argv[])
             set_ctl(FRAME_RATE, opt.fps);
         }
         // disable auto frame rate if the camera has the control
-        (void)tof.setControl(CameraCtrl::AUTO_FRAME_RATE, 0);
+        (void)tof.setControl(Control::AUTO_FRAME_RATE, 0);
     }
 
     // int rang = 0;
-    // tof.setControl(CameraCtrl::RANGE, MAX_DISTANCE);
-    // tof.getControl(CameraCtrl::RANGE, &rang);
+    // tof.setControl(Control::RANGE, MAX_DISTANCE);
+    // tof.getControl(Control::RANGE, &rang);
     // std::cout << rang << std::endl;
 
     info = tof.getCameraInfo();
     int max_range;
-    tof.getControl(CameraCtrl::RANGE, &max_range);
+    tof.getControl(Control::RANGE, &max_range);
     std::cout << "open camera with (" << info.width << "x" << info.height << ") with range " << max_range << std::endl;
 
     if (opt.max_range == 0) {

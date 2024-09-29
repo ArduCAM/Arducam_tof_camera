@@ -117,8 +117,8 @@ int main()
         return -1;
     }
     //  Modify the range also to modify the MAX_DISTANCE
-    tof.setControl(CameraCtrl::RANGE, MAX_DISTANCE);
-    tof.getControl(CameraCtrl::RANGE, &max_range);
+    tof.setControl(Control::RANGE, MAX_DISTANCE);
+    tof.getControl(Control::RANGE, &max_range);
     auto info = tof.getCameraInfo();
     std::cout << "open camera with (" << info.width << "x" << info.height << ")" << std::endl;
 
@@ -127,12 +127,12 @@ int main()
     cv::setMouseCallback("preview", onMouse);
 
     for (;;) {
-        Arducam::FrameDataFormat format;
+        Arducam::FrameFormat format;
         frame = tof.requestFrame(200);
         if (frame == nullptr) {
             continue;
         }
-        frame->getFrameDataFormat(FrameType::DEPTH_FRAME, format);
+        frame->getFormat(FrameType::DEPTH_FRAME, format);
         std::cout << "frame: (" << format.width << "x" << format.height << ")" << std::endl;
         max_height = format.height;
         max_width = format.width;

@@ -9,7 +9,16 @@
 #include <opencv2/imgproc.hpp>
 #include <string>
 
-#define LOCAL static inline
+#define LOCAL       static inline
+#define WITH_VT_100 1
+
+#if WITH_VT_100
+#define ESC(x) "\033" x
+#define NL     ESC("[K\n")
+#else
+#define ESC(x) ""
+#define NL     "\n"
+#endif
 
 using namespace Arducam;
 using namespace std::literals;
@@ -149,7 +158,7 @@ LOCAL void display_fps(void)
 
     ++count;
 
-    std::cout << "fps:" << (1000. / avg_duration) << std::endl;
+    std::cout << "fps:" << (1000. / avg_duration) << NL;
 }
 #else
 LOCAL void display_fps(void)
@@ -162,7 +171,7 @@ LOCAL void display_fps(void)
     ++count;
     auto duration_ms = (time_end - time_beg) / 1ms;
     if (duration_ms >= 1000) {
-        std::cout << "fps:" << count << std::endl;
+        std::cout << "fps:" << count << NL;
         count = 0;
         time_beg = time_end;
     }
@@ -194,13 +203,13 @@ LOCAL std::string saveData(void* data, unsigned int width, unsigned int height, 
     // save data
     auto file = std::ofstream(filename, std::ios::binary);
     if (!file.is_open()) {
-        std::cerr << "save data failed" << std::endl;
+        std::cerr << "save data failed" << NL;
         return "";
     }
     file.write(reinterpret_cast<char*>(data), width * height * to_size(d_type));
     file.close();
 
-    std::cout << "save data to " << filename << std::endl;
+    std::cout << "save data to " << filename << NL;
     return filename;
 }
 
@@ -213,13 +222,13 @@ LOCAL std::string appendData(void* data, unsigned int width, unsigned int height
     // save data
     auto file = std::ofstream(filename, std::ios::app | std::ios::binary);
     if (!file.is_open()) {
-        std::cerr << "append data failed" << std::endl;
+        std::cerr << "append data failed" << NL;
         return "";
     }
     file.write(reinterpret_cast<char*>(data), width * height * to_size(d_type));
     file.close();
 
-    std::cout << "append data to " << filename << std::endl;
+    std::cout << "append data to " << filename << NL;
     return filename;
 }
 
@@ -237,7 +246,11 @@ LOCAL bool checkExit(const opt_data& opt)
 LOCAL bool processKey(const opt_data& opt, void* data, void* data2 = nullptr, void* data3 = nullptr)
 {
     static std::string last_filename;
+    static int need_save_cnt = 0, need_save_input = 0;
     int key = cv::waitKey(1);
+    if (key == -1 && need_save_cnt > 0) {
+        key = 'r';
+    }
     switch (key) {
     case 27:
     case 'q':
@@ -252,13 +265,42 @@ LOCAL bool processKey(const opt_data& opt, void* data, void* data2 = nullptr, vo
         }
         break;
     case 'r':
+        if (need_save_input != 0) {
+            need_save_cnt = need_save_input;
+            need_save_input = 0;
+        }
         if (data2 == nullptr) {
             if (last_filename.empty()) {
                 last_filename = saveData(data, opt.max_width, opt.max_height, "raw", DType::u16);
             } else {
                 last_filename = appendData(data, opt.max_width, opt.max_height, last_filename, DType::u16);
             }
+            need_save_cnt--;
+            if (need_save_cnt == 0) {
+                std::cout << "save done to " << last_filename << NL;
+                last_filename.clear();
+            }
         }
+        break;
+    case 'c':
+        need_save_input = 0;
+        std::cout << "input: " << need_save_input << NL;
+
+        break;
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9': {
+        need_save_input *= 10;
+        need_save_input += key - '0';
+        std::cout << "input: " << need_save_input << NL;
+    }
     default:
         break;
     }
@@ -273,7 +315,7 @@ LOCAL bool raw_loop(Arducam::ArducamTOFCamera& tof, opt_data& data)
     }
     Arducam::FrameFormat format;
     frame->getFormat(FrameType::RAW_FRAME, format);
-    std::cout << "frame: (" << format.width << "x" << format.height << "), time: " << format.timestamp << std::endl;
+    std::cout << "frame: (" << format.width << "x" << format.height << "), time: " << format.timestamp << NL;
     data.max_height = format.height;
     data.max_width = format.width;
 
@@ -291,10 +333,10 @@ LOCAL bool raw_loop(Arducam::ArducamTOFCamera& tof, opt_data& data)
     if (!data.no_preview) {
         cv::imshow("preview", result_frame);
     }
+    display_fps();
     if (!processKey(data, raw_data)) {
         return false;
     }
-    display_fps();
     tof.releaseFrame(frame);
     return true;
 }
@@ -308,7 +350,7 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, opt_data& data)
     }
     Arducam::FrameFormat format;
     frame->getFormat(FrameType::DEPTH_FRAME, format);
-    std::cout << "frame: (" << format.width << "x" << format.height << "), time: " << format.timestamp << std::endl;
+    std::cout << "frame: (" << format.width << "x" << format.height << "), time: " << format.timestamp << "  " << NL;
     data.max_height = format.height;
     data.max_width = format.width;
     const int min_range = data.min_range, max_range = data.max_range;
@@ -316,19 +358,19 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, opt_data& data)
     if (1000000000000UL <= format.timestamp && format.timestamp <= 9000000000000UL) {
         // a timestamp in milliseconds (13 digits)
         uint64_t now = std::chrono::system_clock::now().time_since_epoch() / 1ms;
-        printf("timestamp: %llu, now: %llu, diff: %llums\n", (long long unsigned)format.timestamp,
-               (long long unsigned)now, (long long unsigned)(now - format.timestamp));
+        std::cout << "timestamp: " << format.timestamp << ", now: " << now << ", diff: " << (now - format.timestamp)
+                  << "ms" << NL;
     } else if (1000000000UL <= format.timestamp && format.timestamp <= 9000000000UL) {
         // a timestamp in seconds (10 digits)
         uint64_t now = std::chrono::system_clock::now().time_since_epoch() / 1s;
-        printf("timestamp: %llu, now: %llu, diff: %llus\n", (long long unsigned)format.timestamp,
-               (long long unsigned)now, (long long unsigned)(now - format.timestamp));
+        std::cout << "timestamp: " << format.timestamp << ", now: " << now << ", diff: " << (now - format.timestamp)
+                  << "s" << NL;
     } else {
         // invalid timestamp from epoch
         // with mono timestamp
         uint64_t now = std::chrono::steady_clock::now().time_since_epoch() / 1ms;
-        printf("timestamp: %llu, now: %llu, diff: %llums\n", (long long unsigned)format.timestamp,
-               (long long unsigned)now, (long long unsigned)(now - format.timestamp));
+        std::cout << "timestamp: " << format.timestamp << ", now: " << now << ", diff: " << (now - format.timestamp)
+                  << "ms" << NL;
     }
 #endif
     float* depth_ptr = (float*)frame->getData(FrameType::DEPTH_FRAME);
@@ -347,6 +389,7 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, opt_data& data)
     // getPreview(result_frame, confidence_frame);
     cv::applyColorMap(result_frame, result_frame, cv::COLORMAP_RAINBOW);
     result_frame.setTo(cv::Scalar(0, 0, 0), depth_frame < min_range);
+    result_frame.setTo(cv::Scalar(0, 0, 0), depth_frame > max_range);
     getPreviewRGB(result_frame, confidence_frame_ori, data.confidence_value);
 
     confidence_frame_ori.convertTo(confidence_frame, CV_32F, 1 / 255.0, 0);
@@ -379,7 +422,7 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, opt_data& data)
     if (!data.no_preview) {
         cv::imshow("preview", result_frame);
         std::cout << "select Rect distance: " << cv::mean(depth_frame(data.seletRect)).val[0]
-                  << "mm, pos: " << data.seletRect << std::endl;
+                  << "mm, pos: " << data.seletRect << NL;
     }
     if (!data.no_confidence) {
         cv::imshow("confidence", confidence_frame);
@@ -388,10 +431,10 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, opt_data& data)
         cv::imshow("amplitude", amplitude_frame);
     }
 
+    display_fps();
     if (!processKey(data, depth_ptr, confidence_ptr, amplitude_ptr)) {
         return false;
     }
-    display_fps();
     tof.releaseFrame(frame);
     return true;
 }
@@ -440,19 +483,19 @@ int main(int argc, char* argv[])
 
     switch (option) {
     case 0:
-        printf("320 * 240 with single frequency\n");
+        std::cout << "320 * 240 with single frequency\n";
         break;
     case 1:
-        printf("320 * 240 with double frequency\n");
+        std::cout << "320 * 240 with double frequency\n";
         break;
     case 2:
-        printf("640 * 480 with single frequency\n");
+        std::cout << "640 * 480 with single frequency\n";
         break;
     case 3:
-        printf("640 * 480 with double frequency\n");
+        std::cout << "640 * 480 with double frequency\n";
         break;
     case 4:
-        printf("keep default\n");
+        std::cout << "keep default\n";
         break;
     default:
         return -1;
@@ -526,8 +569,13 @@ int main(int argc, char* argv[])
         }
     }
 
+    std::cout << ESC("[?25l");     // hide cursor
+    std::cout << ESC("7");         // save cursor position
+    std::cout << ESC("[6B") << NL; // move cursor down 6 lines
+    std::cout << ESC("8");         // restore cursor position
     if (opt.raw) {
         for (; raw_loop(tof, opt);) {
+            std::cout << ESC("8"); // restore cursor position
         }
     } else {
         if (!opt.no_confidence) {
@@ -542,14 +590,17 @@ int main(int argc, char* argv[])
             cv::setTrackbarPos("gamma x10", "amplitude", opt.gamma * 10);
         }
         for (; depth_loop(tof, opt);) {
+            std::cout << ESC("8"); // restore cursor position
         }
     }
+    std::cout << ESC("[?25h");     // show cursor
+    std::cout << ESC("[6B") << NL; // move cursor down 6 lines
 
     if (tof.stop()) {
-        fprintf(stderr, "stop camera failed\n");
+        std::cerr << "stop camera failed\n";
     }
     if (tof.close()) {
-        fprintf(stderr, "close camera failed\n");
+        std::cerr << "close camera failed\n";
     }
 
     pid_destroy(opt.gain_pid);

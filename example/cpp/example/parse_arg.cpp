@@ -10,22 +10,26 @@
 LOCAL void help(const char* exec)
 {
     std::cout << "Usage: " << exec << " [OPTION]" << std::endl;
-    std::cout << "  -h,--help           Display this information" << std::endl;
-    std::cout << "  -v,--version        Display the version of the program" << std::endl;
-    std::cout << "  -d,--device NUM     Set the device number" << std::endl;
-    std::cout << "  --raw/--depth       Display the raw or depth frame" << std::endl;
-    std::cout << "  -P,--no-preview     Do not display the preview" << std::endl;
-    std::cout << "  -C,--no-confidence  Do not display the confidence" << std::endl;
-    std::cout << "  -A,--no-amplitude   Do not display the amplitude" << std::endl;
-    std::cout << "  --fps FPS           Set the fps of the camera" << std::endl;
-    std::cout << "  --mode MODE         Set the mode of the camera" << std::endl;
-    std::cout << "      0               320 * 240 with single frequency" << std::endl;
-    std::cout << "      1               320 * 240 with double frequency" << std::endl;
-    std::cout << "      2               640 * 480 with single frequency" << std::endl;
-    std::cout << "      3(*)            640 * 480 with double frequency (default)" << std::endl;
-    std::cout << "  --cfg PATH          The usb camera config file path" << std::endl;
-    std::cout << "  -m,--min-range NUM  Set the min range of the camera (mm)" << std::endl;
-    std::cout << "  -M,--max-range NUM  Set the max range of the camera (mm)" << std::endl;
+    std::cout << "  --help                Display this information" << std::endl;
+    std::cout << "  -V,--version          Display the version of the program" << std::endl;
+    std::cout << "  -d,--device NUM       Set the device number" << std::endl;
+    std::cout << "  --raw/--depth         Display the raw or depth frame" << std::endl;
+    std::cout << "  -P,--no-preview       Do not display the preview" << std::endl;
+    std::cout << "  -C,--no-confidence    Do not display the confidence" << std::endl;
+    std::cout << "  -A,--no-amplitude     Do not display the amplitude" << std::endl;
+    std::cout << "  --fps FPS             Set the fps of the camera" << std::endl;
+    std::cout << "  --mode MODE           Set the mode of the camera" << std::endl;
+    std::cout << "      0                 640 * 480 with single frequency" << std::endl;
+    std::cout << "      1                 640 * 480 with dual frequency (default for VGA ToF sensor)" << std::endl;
+    std::cout << "      -1                Do not set the resolution and frequency (default for HQVGA ToF sensor)" << std::endl;
+    std::cout << "  --confidence NUM      Set the confidence value" << std::endl;
+    std::cout << "  --exposure NUM        Set the exposure time" << std::endl;
+    std::cout << "  -h,--hflip,--h-flip   Enable the horizontal flip" << std::endl;
+    std::cout << "  -v,--vflip,--v-flip   Enable the vertical flip" << std::endl;
+    std::cout << "  --cfg PATH            The usb camera config file path" << std::endl;
+    std::cout << "  -m,--min-range NUM    Set the min range of the camera (mm)" << std::endl;
+    std::cout << "  -M,--max-range NUM    Set the max range of the camera (mm)" << std::endl;
+    std::cout << "  -E,--no-load-eeprom   Disable loading the eeprom" << std::endl;
 }
 
 enum class ArgEnum {
@@ -40,9 +44,14 @@ enum class ArgEnum {
     no_amplitude,
     fps,
     mode,
+    confidence_val,
+    exposure_val,
+    h_flip,
+    v_flip,
     cfg,
     min_range,
     max_range,
+    no_load_eeprom,
 };
 
 template <ArgEnum arg_enum> LOCAL const char* to_str()
@@ -53,27 +62,37 @@ template <ArgEnum arg_enum> LOCAL const char* to_str()
     case ArgEnum::version:
         return "version";
     case ArgEnum::device:
-        return "device";
+        return "device number";
     case ArgEnum::raw:
         return "raw";
     case ArgEnum::depth:
         return "depth";
     case ArgEnum::no_preview:
-        return "no-preview";
+        return "no preview";
     case ArgEnum::no_confidence:
-        return "no-confidence";
+        return "no confidence";
     case ArgEnum::no_amplitude:
-        return "no-amplitude";
+        return "no amplitude";
     case ArgEnum::fps:
         return "fps";
     case ArgEnum::mode:
         return "mode";
+    case ArgEnum::confidence_val:
+        return "confidence";
+    case ArgEnum::exposure_val:
+        return "exposure";
+    case ArgEnum::h_flip:
+        return "horizontal flip";
+    case ArgEnum::v_flip:
+        return "vertical flip";
     case ArgEnum::cfg:
-        return "cfg";
+        return "config file path";
     case ArgEnum::min_range:
-        return "min_range";
+        return "min range";
     case ArgEnum::max_range:
-        return "max_range";
+        return "max range";
+    case ArgEnum::no_load_eeprom:
+        return "no load eeprom";
     default:
         return "unknown";
     }
@@ -91,25 +110,37 @@ LOCAL bool __parse_cfg(opt_data& data, const char* path)
 
 template <ArgEnum arg_enum> LOCAL int __parse_opt(const char* exec, const char* curr, const char* opt, opt_data& data)
 {
+    (void)curr;
+#define ERR_OPT()                                                                                                      \
+    do {                                                                                                               \
+        std::cerr << "Invalid " << to_str<arg_enum>() << std::endl;                                                    \
+        return 0;                                                                                                      \
+    } while (false)
+#define CHECK_OPT()                                                                                                    \
+    do {                                                                                                               \
+        if (opt == nullptr) {                                                                                          \
+            ERR_OPT();                                                                                                 \
+            return 0;                                                                                                  \
+        }                                                                                                              \
+    } while (false)
+#define ASSERT_OPT(cond)                                                                                               \
+    do {                                                                                                               \
+        if (!(cond)) {                                                                                                 \
+            ERR_OPT();                                                                                                 \
+            return 0;                                                                                                  \
+        }                                                                                                              \
+    } while (false)
+
     std::cout << "[info] process " << to_str<arg_enum>() << std::endl;
     switch (arg_enum) {
     case ArgEnum::device: {
-        if (opt == nullptr) {
-            std::cerr << "Invalid device number" << std::endl;
-            return 0;
-        }
+        CHECK_OPT();
         data.device = atoi(opt);
         return 2;
     } break;
     case ArgEnum::cfg: {
-        if (opt == nullptr) {
-            std::cerr << "Invalid config file path" << std::endl;
-            return 0;
-        }
-        if (!__parse_cfg(data, opt)) {
-            std::cerr << "Invalid config file path" << std::endl;
-            return 0;
-        }
+        CHECK_OPT();
+        ASSERT_OPT(__parse_cfg(data, opt));
         return 2;
     } break;
     case ArgEnum::raw: {
@@ -127,52 +158,49 @@ template <ArgEnum arg_enum> LOCAL int __parse_opt(const char* exec, const char* 
     case ArgEnum::no_amplitude: {
         data.no_amplitude = true;
     } break;
+    case ArgEnum::no_load_eeprom: {
+        data.no_load_cali = true;
+    } break;
+    case ArgEnum::h_flip: {
+        data.h_flip = true;
+    } break;
+    case ArgEnum::v_flip: {
+        data.v_flip = true;
+    } break;
+    case ArgEnum::confidence_val: {
+        CHECK_OPT();
+        data.confidence_value = atoi(opt);
+        ASSERT_OPT(data.confidence_value >= 0);
+        return 2;
+    } break;
+    case ArgEnum::exposure_val: {
+        CHECK_OPT();
+        data.exp_time = atoi(opt);
+        ASSERT_OPT(data.exp_time >= 0);
+        return 2;
+    } break;
     case ArgEnum::min_range: {
-        if (opt == nullptr) {
-            std::cerr << "Invalid min range" << std::endl;
-            return 0;
-        }
+        CHECK_OPT();
         data.min_range = atoi(opt);
-        if (data.min_range < 0) {
-            std::cerr << "Invalid min range" << std::endl;
-            return 0;
-        }
+        ASSERT_OPT(data.min_range >= 0);
         return 2;
     } break;
     case ArgEnum::max_range: {
-        if (opt == nullptr) {
-            std::cerr << "Invalid max range" << std::endl;
-            return 0;
-        }
+        CHECK_OPT();
         data.max_range = atoi(opt);
-        if (data.max_range < 0) {
-            std::cerr << "Invalid max range" << std::endl;
-            return 0;
-        }
+        ASSERT_OPT(data.max_range >= 0);
         return 2;
     } break;
     case ArgEnum::mode: {
-        if (opt == nullptr) {
-            std::cerr << "Invalid mode" << std::endl;
-            return 0;
-        }
+        CHECK_OPT();
         data.mode = atoi(opt);
-        if (data.mode < 0 || data.mode > 4) {
-            std::cerr << "Invalid mode" << std::endl;
-            return 0;
-        }
+        ASSERT_OPT(-1 <= data.mode && data.mode <= 2);
         return 2;
     } break;
     case ArgEnum::fps: {
-        if (opt == nullptr) {
-            std::cerr << "Invalid fps" << std::endl;
-            return 0;
-        }
+        CHECK_OPT();
         data.fps = atoi(opt);
-        if (data.fps < 0) {
-            std::cerr << "Invalid fps" << std::endl;
-            return 0;
-        }
+        ASSERT_OPT(data.fps >= 0);
         return 2;
     } break;
     case ArgEnum::help: {
@@ -189,7 +217,8 @@ template <ArgEnum arg_enum> LOCAL int __parse_opt(const char* exec, const char* 
 
 LOCAL int __parse_opt(int argc, char* argv[], int curr, opt_data& data)
 {
-    bool is_opt;
+    bool is_opt, has_arg = false;
+    std::string tmp;
     const char* arg = argv[curr];
     const char* next = curr + 1 < argc ? argv[curr + 1] : nullptr;
     // if start with "--"
@@ -198,6 +227,13 @@ LOCAL int __parse_opt(int argc, char* argv[], int curr, opt_data& data)
     if (arg[1] == '-') {
         is_opt = true;
         arg += 2;
+        auto eq_op = strchr(arg, '='); // find the equal sign
+        if (eq_op != nullptr) {
+            has_arg = true;
+            tmp = std::string(arg, eq_op);
+            arg = tmp.c_str();
+            next = eq_op + 1;
+        }
     } else {
         is_opt = false;
         arg += 1;
@@ -222,18 +258,21 @@ LOCAL int __parse_opt(int argc, char* argv[], int curr, opt_data& data)
 #define LONG(chr, type)                                                                                                \
     else if (!strcmp(arg, chr))                                                                                        \
     {                                                                                                                  \
-        return __parse_opt<type>(argv[0], arg, next, data);                                                            \
+        auto ret = __parse_opt<type>(argv[0], arg, next, data);                                                        \
+        return (has_arg && ret > 1) ? 1 : ret;                                                                         \
     }
 
     if (!is_opt) {
         for (int index = 0; arg[index] != '\0'; index++) {
             switch (arg[index]) {
                 // SHORT('r', ArgEnum::raw)
-                SHORT('h', ArgEnum::help)
-                SHORT('v', ArgEnum::version)
+                SHORT('h', ArgEnum::h_flip)
+                SHORT('v', ArgEnum::v_flip)
+                SHORT('V', ArgEnum::version)
                 SHORT('P', ArgEnum::no_preview)
                 SHORT('C', ArgEnum::no_confidence)
                 SHORT('A', ArgEnum::no_amplitude)
+                SHORT('E', ArgEnum::no_load_eeprom)
                 SHORT_END('d', ArgEnum::device)
                 SHORT_END('m', ArgEnum::min_range)
                 SHORT_END('M', ArgEnum::max_range)
@@ -248,9 +287,16 @@ LOCAL int __parse_opt(int argc, char* argv[], int curr, opt_data& data)
         LONG("cfg", ArgEnum::cfg)
         LONG("raw", ArgEnum::raw)
         LONG("depth", ArgEnum::depth)
+        LONG("confidence", ArgEnum::confidence_val)
+        LONG("exposure", ArgEnum::exposure_val)
+        LONG("hflip", ArgEnum::h_flip)
+        LONG("h-flip", ArgEnum::h_flip)
+        LONG("vflip", ArgEnum::v_flip)
+        LONG("v-flip", ArgEnum::v_flip)
         LONG("no-preview", ArgEnum::no_preview)
         LONG("no-confidence", ArgEnum::no_confidence)
         LONG("no-amplitude", ArgEnum::no_amplitude)
+        LONG("no-load-eeprom", ArgEnum::no_load_eeprom)
         LONG("min-range", ArgEnum::min_range)
         LONG("max-range", ArgEnum::max_range)
         LONG("mode", ArgEnum::mode)

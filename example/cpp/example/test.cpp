@@ -35,10 +35,34 @@ enum class DType {
 
 LOCAL cv::Mat gamma_table(float gamma);
 
+#define DO_LATER(opt, expr)                                                                                            \
+    do {                                                                                                               \
+        std::unique_lock<std::mutex> lk(opt.process_mtx);                                                              \
+        opt.process.push_back([=](Arducam::ArducamTOFCamera& tof) { expr; });                                          \
+    } while (false)
+
 void on_confidence_changed(int pos, void* userdata)
 {
     opt_data& opt = *(opt_data*)userdata;
     opt.confidence_value = pos;
+}
+void on_exposure_changed(int pos, void* userdata)
+{
+    opt_data& opt = *(opt_data*)userdata;
+    opt.exp_time = pos;
+    DO_LATER(opt, tof.setControl(Control::EXPOSURE, pos));
+}
+void on_hflip_changed(int pos, void* userdata)
+{
+    opt_data& opt = *(opt_data*)userdata;
+    opt.h_flip = pos != 0;
+    DO_LATER(opt, tof.setControl(Control::HFLIP, pos));
+}
+void on_vflip_changed(int pos, void* userdata)
+{
+    opt_data& opt = *(opt_data*)userdata;
+    opt.v_flip = pos != 0;
+    DO_LATER(opt, tof.setControl(Control::VFLIP, pos));
 }
 void on_min_range_changed(int pos, void* userdata)
 {
@@ -72,12 +96,14 @@ void on_gamma_changed(int pos, void* userdata)
     auto tmp = pos / 10.0;
     if (tmp != opt.gamma) {
         opt.gamma = tmp;
-        opt.gamma_lut = gamma_table(opt.gamma);
+        opt.gamma_lut = gamma_table((float)opt.gamma);
     }
 }
 
 void onMouse(int event, int x, int y, int flags, void* userdata)
 {
+    (void)flags;
+
     opt_data& opt = *(opt_data*)userdata;
     const auto r = opt.sel_range;
     if (x < r || x > (opt.max_width - r) || y < r || y > (opt.max_height - r))
@@ -135,7 +161,7 @@ LOCAL void display_fps(void)
     using std::chrono::high_resolution_clock;
     static auto start = high_resolution_clock::now();
     static float avg_duration = 0;
-    static float alpha = 1. / 10;
+    static float alpha = 1.F / 10;
     static int count = 0;
 
     auto now = high_resolution_clock::now();
@@ -146,12 +172,12 @@ LOCAL void display_fps(void)
         ++count;
         return;
     } else if (count == 1) {
-        avg_duration = cost_ms;
+        avg_duration = (float)cost_ms;
     } else {
         float t = avg_duration * (1 - alpha) + cost_ms * alpha;
         if (std::isfinite(t)) {
             avg_duration = t;
-            alpha = 1. / (2000. / t);
+            alpha = 1.F / (2000.F / t);
             alpha = std::min(1.F / 30, std::max(1.F / 1, alpha));
         }
     }
@@ -234,6 +260,8 @@ LOCAL std::string appendData(void* data, unsigned int width, unsigned int height
 
 LOCAL bool checkExit(const opt_data& opt)
 {
+    (void)opt;
+
     int key = cv::waitKey(500);
     switch (key) {
     case 27:
@@ -247,7 +275,7 @@ LOCAL bool processKey(const opt_data& opt, void* data, void* data2 = nullptr, vo
 {
     static std::string last_filename;
     static int need_save_cnt = 0, need_save_input = 0;
-    int key = cv::waitKey(1);
+    int key = cv::waitKey(500 / opt.fps);
     if (key == -1 && need_save_cnt > 0) {
         key = 'r';
     }
@@ -438,6 +466,14 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, opt_data& data)
     tof.releaseFrame(frame);
     return true;
 }
+LOCAL void process_later(Arducam::ArducamTOFCamera& tof, opt_data& data)
+{
+    std::unique_lock<std::mutex> lk(data.process_mtx);
+    for (auto& proc : data.process) {
+        proc(tof);
+    }
+    data.process.clear();
+}
 
 #define check(expr, err_msg)                                                                                           \
     do {                                                                                                               \
@@ -459,7 +495,7 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    opt.gamma_lut = gamma_table(opt.gamma);
+    opt.gamma_lut = gamma_table((float)opt.gamma);
     if (!pid_init(&opt.gain_pid, 1. / 4, 1, -1, 0.4, 0.01, 0) ||
         !pid_init(&opt.gain_offset_pid, 1. / 4, 5, -5, 0.4, 0.01, 0.3)) {
         std::cerr << "pid init failed" << std::endl;
@@ -476,48 +512,41 @@ int main(int argc, char* argv[])
 
     int option = opt.mode;
     auto info = tof.getCameraInfo();
-    if (option == -1) {
+    if (option == -2) {
         // hqvga device does not support the other resolutions
-        option = info.device_type == Arducam::DeviceType::DEVICE_VGA ? 3 : 4;
+        option = info.device_type == Arducam::DeviceType::DEVICE_VGA ? 1 : -1;
     }
 
     switch (option) {
+    case -1:
+        std::cout << "keep default\n";
+        break;
     case 0:
-        std::cout << "320 * 240 with single frequency\n";
-        break;
-    case 1:
-        std::cout << "320 * 240 with double frequency\n";
-        break;
-    case 2:
         std::cout << "640 * 480 with single frequency\n";
         break;
-    case 3:
-        std::cout << "640 * 480 with double frequency\n";
-        break;
-    case 4:
-        std::cout << "keep default\n";
+    case 1:
+        std::cout << "640 * 480 with dual frequency\n";
         break;
     default:
         return -1;
     }
 
-    if (option == 4) {
+    if (option == -1) {
         // do nothing
     } else {
-        if (option & 2) {
-            set_ctl(FMT_WIDTH, 640);
-            set_ctl(FMT_HEIGHT, 480);
-        } else {
-            set_ctl(FMT_WIDTH, 640 / 2);
-            set_ctl(FMT_HEIGHT, 480 / 2);
-        }
-
         if (option & 1) {
             set_ctl(MODE, to_int(TofWorkMode::DOUBLE_FREQ));
         } else {
             set_ctl(MODE, to_int(TofWorkMode::SINGLE_FREQ));
         }
     }
+
+    if (opt.no_load_cali) {
+        set_ctl(LOAD_CALI_DATA, 0);
+    }
+
+    set_ctl(HFLIP, opt.h_flip);
+    set_ctl(VFLIP, opt.v_flip);
 
     if (opt.raw) {
         check(tof.start(FrameType::RAW_FRAME), "start camera failed");
@@ -537,6 +566,13 @@ int main(int argc, char* argv[])
         }
         // disable auto frame rate if the camera has the control
         (void)tof.setControl(Control::AUTO_FRAME_RATE, 0);
+    }
+    tof.getControl(Control::FRAME_RATE, &opt.fps);
+
+    if (opt.exp_time == 0) {
+        tof.getControl(Control::EXPOSURE, &opt.exp_time);
+    } else {
+        set_ctl(EXPOSURE, opt.exp_time);
     }
 
     // int rang = 0;
@@ -559,8 +595,15 @@ int main(int argc, char* argv[])
 
         cv::createTrackbar("min-range", "preview", NULL, 6000, on_min_range_changed, &opt);
         cv::createTrackbar("max-range", "preview", NULL, 6000, on_max_range_changed, &opt);
+        cv::createTrackbar("exposure", "preview", NULL, 0xffff, on_exposure_changed, &opt);
+        // cv::createTrackbar("hflip", "preview", NULL, 1, on_hflip_changed, &opt);
+        // cv::createTrackbar("vflip", "preview", NULL, 1, on_vflip_changed, &opt);
+
         cv::setTrackbarPos("min-range", "preview", opt.min_range);
         cv::setTrackbarPos("max-range", "preview", opt.max_range);
+        cv::setTrackbarPos("exposure", "preview", opt.exp_time);
+        // cv::setTrackbarPos("hflip", "preview", opt.h_flip);
+        // cv::setTrackbarPos("vflip", "preview", opt.v_flip);
 
         if (info.device_type == Arducam::DeviceType::DEVICE_VGA) {
             // only vga support confidence
@@ -569,12 +612,13 @@ int main(int argc, char* argv[])
         }
     }
 
-    std::cout << ESC("[?25l");     // hide cursor
-    std::cout << ESC("7");         // save cursor position
-    std::cout << ESC("[6B") << NL; // move cursor down 6 lines
-    std::cout << ESC("8");         // restore cursor position
+    std::cout << ESC("[?25l");                     // hide cursor
+    std::cout << ESC("7");                         // save cursor position
+    std::cout << NL << NL << NL << NL << NL << NL; // move cursor down 6 lines
+    std::cout << ESC("8");                         // restore cursor position
     if (opt.raw) {
         for (; raw_loop(tof, opt);) {
+            process_later(tof, opt);
             std::cout << ESC("8"); // restore cursor position
         }
     } else {
@@ -586,10 +630,11 @@ int main(int argc, char* argv[])
 
             cv::createTrackbar("gain x10", "amplitude", NULL, static_cast<int>(80.0 * 10), on_gain_changed, &opt);
             cv::createTrackbar("gamma x10", "amplitude", NULL, static_cast<int>(2.5 * 10), on_gamma_changed, &opt);
-            cv::setTrackbarPos("gain x10", "amplitude", opt.gain * 10);
-            cv::setTrackbarPos("gamma x10", "amplitude", opt.gamma * 10);
+            cv::setTrackbarPos("gain x10", "amplitude", static_cast<int>(opt.gain * 10));
+            cv::setTrackbarPos("gamma x10", "amplitude", static_cast<int>(opt.gamma * 10));
         }
         for (; depth_loop(tof, opt);) {
+            process_later(tof, opt);
             std::cout << ESC("8"); // restore cursor position
         }
     }
@@ -611,7 +656,7 @@ int main(int argc, char* argv[])
 LOCAL cv::Mat gamma_table(float gamma)
 {
     cv::Mat lut(1, 256, CV_8U);
-    float inv_gamma = 1.0 / gamma;
+    float inv_gamma = 1.F / gamma;
     for (int i = 0; i < 256; i++) {
         lut.at<uint8_t>(i) = cv::saturate_cast<uint8_t>(pow(i / 255.0, inv_gamma) * 255.0);
     }

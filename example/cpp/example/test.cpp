@@ -545,8 +545,8 @@ int main(int argc, char* argv[])
         set_ctl(LOAD_CALI_DATA, 0);
     }
 
-    set_ctl(HFLIP, opt.h_flip);
-    set_ctl(VFLIP, opt.v_flip);
+    // set_ctl(HFLIP, opt.h_flip);
+    // set_ctl(VFLIP, opt.v_flip);
 
     if (opt.raw) {
         check(tof.start(FrameType::RAW_FRAME), "start camera failed");

@@ -16,8 +16,12 @@ class TOFPublisher(Node):
     def __init__(self, tof: ArducamCamera, camera_info: ArducamInfo):
         super().__init__('arducam')
         self.tof_ = tof
-        self.width_ = camera_info.width
-        self.height_ = camera_info.height // 10 - 1
+        if camera_info.device_type == TOFDeviceType.HQVGA:
+            self.width_ = camera_info.width
+            self.height_ = camera_info.height
+        else:
+            self.width_ = camera_info.width
+            self.height_ = camera_info.height // 10 - 1
         self.pointsize_ = self.width_ * self.height_
         self.frame_id = "sensor_frame"
         self.depth_msg_ = Float32MultiArray()

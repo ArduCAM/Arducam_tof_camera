@@ -1,63 +1,68 @@
-## Run the example in the ros2_publisher folder
+# ros2_publisher
 
-**RaspberryPi:**  
+## Dependencies
 
-> Please refer to the instructions above for  _*a. Driver Install*_ , _*b.Configuration*_ and _*c.SDK install*_ whice run on RaspberryPi  
+**Raspberry Pi:**  
+
+> Please refer to the instructions above for _*a. Driver Install*_, _*b. Configuration*_, and _*c. SDK Install*_ which run on Raspberry Pi.  
 
 **Jetson:**  
 
-> Please refer to the instructions above for  _*project dependencies*_ and _*SDK install*_ whice run on Jetson
+> Please refer to the instructions above for _*project dependencies*_ and _*SDK Install*_ which run on Jetson.
 
-### Ros2 installed on RaspberryPI
+### ROS2 Installation
 
-**Note:** 
+#### On Raspberry Pi
 
-This script only supports RaspberryPi OS bullseye 32-bit,If you want to run ros2 on 64-bit os, you can see this [repository](https://github.com/Ar-Ray-code/rpi-bullseye-ros2)
+Install ROS2 on Raspberry Pi. See [ROS2 Installation](https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html) for details.
+Alternatively, you can use a third-party installation script to install ROS2 on Raspberry Pi. See [this repository](https://github.com/Ar-Ray-code/rpi-bullseye-ros2) for details.
 
-> The example is based on ros2,We found the installation script on github, you can install it as follows, or you can install it yourself. author : [Ar-Ray](https://github.com/Ar-Ray-code/rpi-bullseye-ros2)
+#### On Jetson
 
-```Shell
-# default : (humble, arm7l)
-curl -s https://raw.githubusercontent.com/v1ster/rpi-bullseye-ros2/main/install.bash | bash
-```
+The example is based on ROS2. Please refer to [ROS2 Installation](https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html) and install it yourself.
 
-```Shell
-# Environment variable configuration,Take the humble version as an example
-echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc 
-echo "export ROS_DOMAIN_ID=7" >> ~/.bashrc 
-source ~/.bashrc 
-```
-
-### Ros2 installed on Jetson
-
-> Please refer to the instructions above for  _* Driver Install*_ .
-
-The example is based on ros2, please refer to [ros2 installation](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html) and install it yourself
-
-```Shell
+```bash
 # Install the compilation tool colcon
 sudo apt install python3-colcon-common-extensions
-# Environment variable configuration,Take the humble version as an example
+```
+
+### ROS2 post-installation
+
+Then export the environment variables to the bashrc file.
+
+-----
+> for humble version
+
+```Shell
 echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc 
 echo "export ROS_DOMAIN_ID=7" >> ~/.bashrc 
 source ~/.bashrc 
 ```
 
-#### Compilation
+-----
+> for jazzy version
+
+```Shell
+echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+echo "export ROS_DOMAIN_ID=7" >> ~/.bashrc
+source ~/.bashrc
+```
+
+## Compilation
 
 ```Shell
   cd Arducam_tof_camera/ros2_publisher
   colcon build --merge-install 
 ```
 
-#### Run C++ examples
+### Run C++ examples
 
 ```Shell
   . install/setup.bash 
   ros2 run arducam_rclcpp_tof_pointcloud tof_pointcloud
 ```
 
-#### Run Python examples
+### Run Python examples
 
 ```shell
   . install/setup.bash 
@@ -66,7 +71,7 @@ source ~/.bashrc
 
 >You can preview by running rviz2 on the host in the LAN
 
-#### RViz2
+### RViz2
 
 > If you encounter an error like this:
 > ![rviz::RenderSystem: error](../img/rviz_error.png)

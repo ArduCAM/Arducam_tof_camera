@@ -8,7 +8,8 @@ def main():
     print("  SDK version:", ac.__version__)
 
     cam = ac.ArducamCamera()
-    cfg_path = "/home/user/Downloads/Configuration/SIF2618RM_Tof_4_Modes/SIF2618RM_Tof_4_Modes_MIPI_2Lane_RAW12_8b_640x4810.cfg"
+    cfg_path = None
+    # cfg_path = "file.cfg"
 
     ret = 0
     if cfg_path is not None:

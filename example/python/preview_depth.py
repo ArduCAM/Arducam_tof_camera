@@ -72,8 +72,9 @@ def main():
     print("  SDK version:", ac.__version__)
 
     cam = ac.ArducamCamera()
-    cfg_path = "/home/user/Downloads/Configuration/SIF2618RM_Tof_4_Modes/SIF2618RM_Tof_4_Modes_MIPI_2Lane_RAW12_8b_640x4810.cfg"
-    # cfg_path = "/home/user/workspace/arducamusb3.0privariety/result/TOF/0_TOF_MIPI_2Lane_RAW12_8b_240x180_60FPS.cfg"
+    cfg_path = None
+    # cfg_path = "file.cfg"
+
     black_color = (0, 0, 0)
     white_color = (255, 255, 255)
 

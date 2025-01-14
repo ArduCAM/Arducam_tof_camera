@@ -1,6 +1,7 @@
 #include "test.hpp"
 
 #include "ArducamTOFCamera.hpp"
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <fstream>
@@ -45,6 +46,11 @@ void on_confidence_changed(int pos, void* userdata)
 {
     opt_data& opt = *(opt_data*)userdata;
     opt.confidence_value = pos;
+}
+void on_amplitude_changed(int pos, void* userdata)
+{
+    opt_data& opt = *(opt_data*)userdata;
+    opt.amplitude_value = opt_data::amplitude_value_step(pos);
 }
 void on_exposure_changed(int pos, void* userdata)
 {
@@ -204,16 +210,17 @@ LOCAL void display_fps(void)
 }
 #endif
 
+#if 0
 LOCAL void getPreview(cv::Mat preview_ptr, cv::Mat confidence_image_ptr, int confidence_value)
 {
     preview_ptr.setTo(255, confidence_image_ptr < confidence_value);
 }
-
 LOCAL void getPreviewRGB(cv::Mat preview_ptr, cv::Mat confidence_image_ptr, int confidence_value)
 {
     preview_ptr.setTo(cv::Scalar(0, 0, 0), confidence_image_ptr < confidence_value);
     // cv::GaussianBlur(preview_ptr, preview_ptr, cv::Size(7, 7), 0);
 }
+#endif
 
 LOCAL std::string saveData(void* data, unsigned int width, unsigned int height, const char* prefix = "depth",
                            DType d_type = DType::f32)
@@ -275,7 +282,12 @@ LOCAL bool processKey(const opt_data& opt, void* data, void* data2 = nullptr, vo
 {
     static std::string last_filename;
     static int need_save_cnt = 0, need_save_input = 0;
-    int key = cv::waitKey(500 / opt.fps);
+    int key = 0;
+    if (opt.fps <= 0) {
+        key = cv::waitKey(1);
+    } else {
+        key = cv::waitKey(500 / opt.fps);
+    }
     if (key == -1 && need_save_cnt > 0) {
         key = 'r';
     }
@@ -346,6 +358,25 @@ LOCAL bool raw_loop(Arducam::ArducamTOFCamera& tof, opt_data& data)
     std::cout << "frame: (" << format.width << "x" << format.height << "), time: " << format.timestamp << NL;
     data.max_height = format.height;
     data.max_width = format.width;
+#if SHOW_FRAME_DELAY
+    if (1000000000000UL <= format.timestamp && format.timestamp <= 9000000000000UL) {
+        // a timestamp in milliseconds (13 digits)
+        uint64_t now = std::chrono::system_clock::now().time_since_epoch() / 1ms;
+        std::cout << "timestamp: " << format.timestamp << ", now: " << now << ", diff: " << (now - format.timestamp)
+                  << "ms" << NL;
+    } else if (1000000000UL <= format.timestamp && format.timestamp <= 9000000000UL) {
+        // a timestamp in seconds (10 digits)
+        uint64_t now = std::chrono::system_clock::now().time_since_epoch() / 1s;
+        std::cout << "timestamp: " << format.timestamp << ", now: " << now << ", diff: " << (now - format.timestamp)
+                  << "s" << NL;
+    } else {
+        // invalid timestamp from epoch
+        // with mono timestamp
+        uint64_t now = std::chrono::steady_clock::now().time_since_epoch() / 1ms;
+        std::cout << "timestamp: " << format.timestamp << ", now: " << now << ", diff: " << (now - format.timestamp)
+                  << "ms" << NL;
+    }
+#endif
 
     // depth_ptr = (float*)frame->getData(FrameType::DEPTH_FRAME);
     uint16_t* raw_data = (uint16_t*)frame->getData(FrameType::RAW_FRAME);
@@ -416,20 +447,29 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, opt_data& data)
                           (-min_range * 255.0) / (max_range - min_range));
     // getPreview(result_frame, confidence_frame);
     cv::applyColorMap(result_frame, result_frame, cv::COLORMAP_RAINBOW);
-    result_frame.setTo(cv::Scalar(0, 0, 0), depth_frame < min_range);
-    result_frame.setTo(cv::Scalar(0, 0, 0), depth_frame > max_range);
-    getPreviewRGB(result_frame, confidence_frame_ori, data.confidence_value);
+    result_frame.setTo(cv::Scalar(0, 0, 0), (depth_frame < min_range) | (depth_frame > max_range));
+    result_frame.setTo(cv::Scalar(0, 0, 0),
+                       (confidence_frame_ori < data.confidence_value) | (amplitude_frame_ori < data.amplitude_value));
 
     confidence_frame_ori.convertTo(confidence_frame, CV_32F, 1 / 255.0, 0);
     // cv::normalize(amplitude_frame_ori, amplitude_frame, 255, 0, cv::NORM_MINMAX, CV_8U);
     if (data.gain == 0) {
         double min, max;
-        cv::minMaxLoc(amplitude_frame_ori, &min, &max);
-        constexpr double gain_min = 0.05 / (1 << (12 - 8));
-        constexpr double gain_max = 80 / (1 << (12 - 8));
+        // cv::minMaxLoc(amplitude_frame_ori, &min, &max);
+        std::vector<float> tmp;
+        amplitude_frame_ori.reshape(1, 1).copyTo(tmp);
+        auto min_it = tmp.begin() + tmp.size() * 0.02;
+        std::nth_element(tmp.begin(), min_it, tmp.end());
+        min = *min_it;
+        auto max_it = tmp.begin() + tmp.size() * 0.98;
+        std::nth_element(tmp.begin(), max_it, tmp.end());
+        max = *max_it;
+        // printf("= min: %f, max: %f\n", min, max);
+        constexpr double gain_min = .05 / (1 << (12 - 8));
+        constexpr double gain_max = 80. / (1 << (12 - 8));
         double exp_gain = 255.0 / (max - min);
-        double exp_offset = -min * 255.0 / (max - min);
         exp_gain = std::min(std::max(exp_gain, gain_min), gain_max);
+        double exp_offset = -min * exp_gain;
         double inc_gain = pid_calculate(data.gain_pid, exp_gain, data.gain_val);
         double inc_offset = pid_calculate(data.gain_offset_pid, exp_offset, data.gain_offset_val);
         data.gain_val = data.gain_val + inc_gain;
@@ -483,9 +523,17 @@ LOCAL void process_later(Arducam::ArducamTOFCamera& tof, opt_data& data)
             return -1;                                                                                                 \
         }                                                                                                              \
     } while (0)
+#define check_nonret(expr, err_msg)                                                                                    \
+    do {                                                                                                               \
+        Arducam::TofErrorCode ret = (expr);                                                                            \
+        if (ret != Arducam::TofErrorCode::ArducamSuccess) {                                                            \
+            std::cerr << err_msg << ": " << to_str(ret) << std::endl;                                                  \
+        }                                                                                                              \
+    } while (0)
 
-#define set_ctl_(tof, ctrl, val) check(tof.setControl(Control::ctrl, val), "set control(" #ctrl ", " #val ") failed")
-#define set_ctl(ctrl, val)       set_ctl_(tof, ctrl, val)
+#define set_ctl_(tof, ctrl, val)                                                                                       \
+    check_nonret(tof.setControl(Control::ctrl, val), "set control(" #ctrl ", " #val ") failed")
+#define set_ctl(ctrl, val) set_ctl_(tof, ctrl, val)
 
 int main(int argc, char* argv[])
 {
@@ -545,8 +593,8 @@ int main(int argc, char* argv[])
         set_ctl(LOAD_CALI_DATA, 0);
     }
 
-    // set_ctl(HFLIP, opt.h_flip);
-    // set_ctl(VFLIP, opt.v_flip);
+    set_ctl(HFLIP, opt.h_flip);
+    set_ctl(VFLIP, opt.v_flip);
 
     if (opt.raw) {
         check(tof.start(FrameType::RAW_FRAME), "start camera failed");
@@ -584,6 +632,8 @@ int main(int argc, char* argv[])
     int max_range;
     tof.getControl(Control::RANGE, &max_range);
     std::cout << "open camera with (" << info.width << "x" << info.height << ") with range " << max_range << std::endl;
+    // tof.writeSensor(0x0402, 0x01301e00);
+    tof.writeSensor(0x0402, 0x01300a00);
 
     if (opt.max_range == 0) {
         opt.max_range = max_range;
@@ -609,6 +659,9 @@ int main(int argc, char* argv[])
             // only vga support confidence
             cv::createTrackbar("confidence", "preview", NULL, 255, on_confidence_changed, &opt);
             cv::setTrackbarPos("confidence", "preview", opt.confidence_value);
+            cv::createTrackbar("amplitude", "preview", NULL, opt_data::amplitude_value_range, on_amplitude_changed,
+                               &opt);
+            cv::setTrackbarPos("amplitude", "preview", 0);
         }
     }
 

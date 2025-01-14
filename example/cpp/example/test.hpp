@@ -2,6 +2,7 @@
 
 #include "ArducamTOFCamera.hpp"
 #include "pid.h"
+#include <cmath>
 #include <functional>
 #include <mutex>
 #include <opencv2/core.hpp>
@@ -20,6 +21,15 @@ struct opt_data {
     int min_range = 0;
     int max_range = 0;
     int confidence_value = 30;
+    static constexpr int amplitude_value_max = (1 << 12) / 20;
+    static constexpr int amplitude_value_range = 16;
+    static constexpr double amplitude_value_step_no_linear_base = 1.5;
+    static constexpr int amplitude_value_step(int val)
+    {
+        return (std::pow(val, amplitude_value_step_no_linear_base) - 1) /
+               (std::pow(amplitude_value_range, amplitude_value_step_no_linear_base) - 1) * amplitude_value_max;
+    }
+    int amplitude_value = amplitude_value_step(0);
     int exp_time = 0;
     bool h_flip = false, v_flip = false;
 
@@ -29,7 +39,7 @@ struct opt_data {
     int max_width = 240;
     int max_height = 180;
     double gain = 0;
-    double gamma = 1;
+    double gamma = 1.7;
     cv::Mat gamma_lut;
     double gain_val = 1, gain_offset_val = 0;
     pid_ref gain_pid, gain_offset_pid;

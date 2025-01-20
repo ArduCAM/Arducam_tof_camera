@@ -11,7 +11,7 @@
 #include <string>
 
 #define LOCAL       static inline
-#define WITH_VT_100 1
+#define WITH_VT_100 0
 
 #if WITH_VT_100
 #define ESC(x) "\033" x
@@ -560,9 +560,9 @@ int main(int argc, char* argv[])
 
     int option = opt.mode;
     auto info = tof.getCameraInfo();
-    if (option == -2) {
+    if (info.device_type == Arducam::DeviceType::DEVICE_HQVGA) {
         // hqvga device does not support the other resolutions
-        option = info.device_type == Arducam::DeviceType::DEVICE_VGA ? 1 : -1;
+        option = -1;
     }
 
     switch (option) {
@@ -621,6 +621,10 @@ int main(int argc, char* argv[])
         tof.getControl(Control::EXPOSURE, &opt.exp_time);
     } else {
         set_ctl(EXPOSURE, opt.exp_time);
+    }
+
+    if (info.device_type == Arducam::DeviceType::DEVICE_HQVGA) {
+        set_ctl(RANGE, opt.mode == 0 ? 2000 : 4000);
     }
 
     // int rang = 0;

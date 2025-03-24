@@ -26,14 +26,22 @@ struct opt_data {
     static constexpr double amplitude_value_step_no_linear_base = 1.5;
     static constexpr int amplitude_value_step(int val)
     {
-        return (std::pow(val, amplitude_value_step_no_linear_base) - 1) /
-               (std::pow(amplitude_value_range, amplitude_value_step_no_linear_base) - 1) * amplitude_value_max;
+        /**
+         * make a simple non-linear step
+         * \alpha = 1.5
+         * \text{range} = 16
+         * \text{max} = \frac{1 << 12}{20}
+         * f(val) = \frac{val^{\alpha} - 1}{\text{range}^{\alpha} - 1} \times \text{max}
+         */
+        return static_cast<int>( //
+            (std::pow(val, amplitude_value_step_no_linear_base) - 1) /
+            (std::pow(amplitude_value_range, amplitude_value_step_no_linear_base) - 1) * amplitude_value_max);
     }
     int amplitude_value = amplitude_value_step(0);
     int exp_time = 0;
     bool h_flip = false, v_flip = false;
 
-    cv::Rect seletRect{0, 0, 0, 0};
+    cv::Rect selectRect{0, 0, 0, 0};
     cv::Rect followRect{0, 0, 0, 0};
     int sel_range = 4;
     int max_width = 240;

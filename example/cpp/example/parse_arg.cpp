@@ -19,9 +19,9 @@ LOCAL void help(const char* exec)
     std::cout << "  -A,--no-amplitude     Do not display the amplitude" << std::endl;
     std::cout << "  --fps FPS             Set the fps of the camera" << std::endl;
     std::cout << "  --mode MODE           Set the mode of the camera" << std::endl;
-    std::cout << "      0                 640 * 480 with single frequency" << std::endl;
-    std::cout << "      1                 640 * 480 with dual frequency (default for VGA ToF sensor)" << std::endl;
-    std::cout << "      -1                Do not set the resolution and frequency (default for HQVGA ToF sensor)" << std::endl;
+    std::cout << "      0                 Near mode" << std::endl;
+    std::cout << "      1                 Far mode (default if supported)" << std::endl;
+    std::cout << "      -1                Do not set mode" << std::endl;
     std::cout << "  --confidence NUM      Set the confidence value" << std::endl;
     std::cout << "  --exposure NUM        Set the exposure time" << std::endl;
     std::cout << "  -h,--hflip,--h-flip   Enable the horizontal flip" << std::endl;

@@ -119,10 +119,10 @@ void onMouse(int event, int x, int y, int flags, void* userdata)
         break;
 
     case cv::EVENT_LBUTTONUP:
-        opt.seletRect.x = x - r;
-        opt.seletRect.y = y - r;
-        opt.seletRect.width = 2 * r;
-        opt.seletRect.height = 2 * r;
+        opt.selectRect.x = x - r;
+        opt.selectRect.y = y - r;
+        opt.selectRect.width = 2 * r;
+        opt.selectRect.height = 2 * r;
         break;
     default:
         opt.followRect.x = x - r;
@@ -484,13 +484,13 @@ LOCAL bool depth_loop(Arducam::ArducamTOFCamera& tof, opt_data& data)
         cv::LUT(amplitude_frame, data.gamma_lut, amplitude_frame);
     }
 
-    cv::rectangle(result_frame, data.seletRect, cv::Scalar(0, 0, 0), 2);
+    cv::rectangle(result_frame, data.selectRect, cv::Scalar(0, 0, 0), 2);
     cv::rectangle(result_frame, data.followRect, cv::Scalar(255, 255, 255), 1);
 
     if (!data.no_preview) {
         cv::imshow("preview", result_frame);
-        std::cout << "select Rect distance: " << cv::mean(depth_frame(data.seletRect)).val[0]
-                  << "mm, pos: " << data.seletRect << NL;
+        std::cout << "select Rect distance: " << cv::mean(depth_frame(data.selectRect)).val[0]
+                  << "mm, pos: " << data.selectRect << NL;
     }
     if (!data.no_confidence) {
         cv::imshow("confidence", confidence_frame);
@@ -561,31 +561,60 @@ int main(int argc, char* argv[])
     int option = opt.mode;
     auto info = tof.getCameraInfo();
     if (info.device_type == Arducam::DeviceType::DEVICE_HQVGA) {
-        // hqvga device does not support the other resolutions
-        option = -1;
-    }
+        if (option == -2) {
+            option = 1;
+        }
+        switch (option) {
+        case -1:
+            std::cout << "keep default\n";
+            break;
+        case 0:
+            std::cout << "near mode\n";
+            break;
+        case 1:
+            std::cout << "far mode\n";
+            break;
+        default:
+            std::cout << "invalid mode: " << option << std::endl;
+            return -1;
+        }
 
-    switch (option) {
-    case -1:
-        std::cout << "keep default\n";
-        break;
-    case 0:
-        std::cout << "640 * 480 with single frequency\n";
-        break;
-    case 1:
-        std::cout << "640 * 480 with dual frequency\n";
-        break;
-    default:
-        return -1;
-    }
-
-    if (option == -1) {
-        // do nothing
-    } else {
-        if (option & 1) {
-            set_ctl(MODE, to_int(TofWorkMode::DOUBLE_FREQ));
+        if (option == -1) {
+            // do nothing
         } else {
-            set_ctl(MODE, to_int(TofWorkMode::SINGLE_FREQ));
+            if (option & 1) {
+                set_ctl(RANGE, 4000);
+            } else {
+                set_ctl(RANGE, 2000);
+            }
+        }
+    } else if (info.device_type == Arducam::DeviceType::DEVICE_VGA) {
+        if (option == -2) {
+            option = 1;
+        }
+        switch (option) {
+        case -1:
+            std::cout << "keep default\n";
+            break;
+        case 0:
+            std::cout << "640 * 480 with single frequency\n";
+            break;
+        case 1:
+            std::cout << "640 * 480 with dual frequency\n";
+            break;
+        default:
+            std::cout << "invalid mode: " << option << std::endl;
+            return -1;
+        }
+
+        if (option == -1) {
+            // do nothing
+        } else {
+            if (option & 1) {
+                set_ctl(MODE, to_int(TofWorkMode::DOUBLE_FREQ));
+            } else {
+                set_ctl(MODE, to_int(TofWorkMode::SINGLE_FREQ));
+            }
         }
     }
 
@@ -649,20 +678,22 @@ int main(int argc, char* argv[])
 
         cv::createTrackbar("min-range", "preview", NULL, 6000, on_min_range_changed, &opt);
         cv::createTrackbar("max-range", "preview", NULL, 6000, on_max_range_changed, &opt);
-        cv::createTrackbar("exposure", "preview", NULL, 0xffff, on_exposure_changed, &opt);
         // cv::createTrackbar("hflip", "preview", NULL, 1, on_hflip_changed, &opt);
         // cv::createTrackbar("vflip", "preview", NULL, 1, on_vflip_changed, &opt);
 
         cv::setTrackbarPos("min-range", "preview", opt.min_range);
         cv::setTrackbarPos("max-range", "preview", opt.max_range);
-        cv::setTrackbarPos("exposure", "preview", opt.exp_time);
         // cv::setTrackbarPos("hflip", "preview", opt.h_flip);
         // cv::setTrackbarPos("vflip", "preview", opt.v_flip);
 
         if (info.device_type == Arducam::DeviceType::DEVICE_VGA) {
+            // exposure time
+            cv::createTrackbar("exposure", "preview", NULL, 3000, on_exposure_changed, &opt);
+            cv::setTrackbarPos("exposure", "preview", opt.exp_time);
             // only vga support confidence
             cv::createTrackbar("confidence", "preview", NULL, 255, on_confidence_changed, &opt);
             cv::setTrackbarPos("confidence", "preview", opt.confidence_value);
+            // amplitude filter
             cv::createTrackbar("amplitude", "preview", NULL, opt_data::amplitude_value_range, on_amplitude_changed,
                                &opt);
             cv::setTrackbarPos("amplitude", "preview", 0);

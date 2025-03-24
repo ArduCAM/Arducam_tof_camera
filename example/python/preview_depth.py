@@ -2,6 +2,9 @@ import cv2
 import numpy as np
 import ArducamDepthCamera as ac
 
+# MAX_DISTANCE value modifiable  is 2000 or 4000
+MAX_DISTANCE=4000
+
 
 class UserRect:
     def __init__(self) -> None:
@@ -92,6 +95,8 @@ def main():
         print("Failed to start camera. Error code:", ret)
         cam.close()
         return
+
+    cam.setControl(ac.Control.RANGE, MAX_DISTANCE)
 
     r = cam.getControl(ac.Control.RANGE)
 

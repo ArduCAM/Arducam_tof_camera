@@ -3,7 +3,7 @@ import numpy as np
 import ArducamDepthCamera as ac
 
 # MAX_DISTANCE value modifiable  is 2000 or 4000
-MAX_DISTANCE=4000
+MAX_DISTANCE=2000
 
 
 class UserRect:
@@ -110,7 +110,7 @@ def main():
         # Only VGA support confidence
         cv2.createTrackbar(
             "confidence", "preview", confidence_value, 255, on_confidence_changed
-        )
+        ) 
 
     while True:
         frame = cam.requestFrame(2000)

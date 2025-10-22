@@ -13,7 +13,7 @@ Camera::~Camera() {
 }
 
 bool Camera::open() {
-    if (tof_.open(connection_type_)) {
+    if (tof_.open(connection_type_) != 0) {
         std::cerr << "initialization failed" << std::endl;
         return false;
     }
@@ -22,7 +22,7 @@ bool Camera::open() {
 }
 
 bool Camera::start(Arducam::FrameType type) {
-    if (tof_.start(type)) {
+    if (tof_.start(type) != 0) {
         std::cerr << "Failed to start camera" << std::endl;
         return false;
     }
@@ -32,14 +32,14 @@ bool Camera::start(Arducam::FrameType type) {
 }
 
 void Camera::stop() {
-    if (tof_.stop()) {
+    if (tof_.stop() != 0) {
         std::cerr << "Failed to stop camera" << std::endl;
     }
     is_running_ = false;
 }
 
 void Camera::close() {
-    if (tof_.close()) {
+    if (tof_.close() != 0) {
         std::cerr << "Failed to close camera" << std::endl;
     }
     is_open_ = false;

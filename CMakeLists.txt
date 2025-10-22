@@ -1,17 +1,16 @@
 cmake_minimum_required(VERSION 3.4)
 
-project(TOFCameraExample)
+project(modern_preview)
 
-# /home/user/workspace/tof/arducam_tof_sdk/install/lib/cmake/ArducamDepthCamera/ArducamDepthCameraConfig.cmake
-# set(ArducamDepthCamera_DIR "/home/user/workspace/tof/arducam_tof_sdk/install/lib/cmake/ArducamDepthCamera")
 find_package(ArducamDepthCamera REQUIRED)
+find_package(OpenCV REQUIRED)
 
-set(CLIBS ArducamDepthCamera::ArducamDepthCamera4C)
-set(CXXLIBS ArducamDepthCamera::ArducamDepthCamera)
+include_directories(${OpenCV_INCLUDE_DIRS})
 
-# include_directories(${INC_DIR})
-# include_directories("/usr/local/include")
-# link_directories("/usr/local/lib")
+add_executable(modern_preview
+    source/main.cpp
+    source/Camera.cpp
+    source/Viewer.cpp
+    source/TOFApplication.cpp)
 
-add_subdirectory(example)
-add_subdirectory(open3d_preview)
+target_link_libraries(modern_preview ArducamDepthCamera::ArducamDepthCamera ${OpenCV_LIBS})

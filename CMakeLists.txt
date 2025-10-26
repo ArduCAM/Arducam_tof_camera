@@ -8,7 +8,7 @@ find_package(OpenCV REQUIRED)
 include_directories(include)
 
 add_executable(modern_preview
-    app/main.cpp
+    apps/main.cpp
     src/Camera.cpp
     src/Viewer.cpp
     src/TOFApplication.cpp)

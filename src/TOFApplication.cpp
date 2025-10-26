@@ -7,7 +7,7 @@ TOFApplication::TOFApplication() {}
 TOFApplication::~TOFApplication() {}
 
 int TOFApplication::initialize() {
-    camera_ = std::make_unique<Camera>(Arducam::Connection::USB);
+    camera_ = std::make_unique<Camera>(Arducam::Connection::CSI, 0);
     if (!camera_->open()) {
         return -1;
     }

@@ -1,7 +1,7 @@
 #include "Camera.h"
 #include <iostream>
 
-Camera::Camera(Arducam::Connection type) : connection_type_(type) {}
+Camera::Camera(Arducam::Connection type, int index) : connection_type_(type), device_index_(index) {}
 
 Camera::~Camera() {
     if (is_running_) {
@@ -13,7 +13,7 @@ Camera::~Camera() {
 }
 
 bool Camera::open() {
-    if (tof_.open(connection_type_) != 0) {
+    if (tof_.open(connection_type_, device_index_) != 0) {
         std::cerr << "initialization failed" << std::endl;
         return false;
     }

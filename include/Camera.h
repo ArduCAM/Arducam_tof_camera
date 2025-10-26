@@ -5,7 +5,7 @@
 
 class Camera {
 public:
-    Camera(Arducam::Connection type);
+    Camera(Arducam::Connection type, int index = 0);
     ~Camera();
 
     bool open();
@@ -21,6 +21,7 @@ public:
 private:
     Arducam::ArducamTOFCamera tof_;
     Arducam::Connection connection_type_;
+    int device_index_;
     Arducam::FrameType frame_type_;
     bool is_open_ = false;
     bool is_running_ = false;

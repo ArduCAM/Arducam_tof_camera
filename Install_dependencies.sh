@@ -49,8 +49,14 @@ fi
 
 if [ $(dpkg -l | grep -c arducam-tof-sdk-dev) -lt 1 ]; then
     echo "Add Arducam_ppa repositories."
-    curl -s --compressed "https://arducam.github.io/arducam_ppa/KEY.gpg" | sudo apt-key add -
-    sudo curl -s --compressed -o /etc/apt/sources.list.d/arducam_list_files.list "https://arducam.github.io/arducam_ppa/arducam_list_files.list"
+    # if debian 13
+    if [ $(lsb_release -r | awk '{print $2}' | cut -d. -f1) -ge 13 ]; then
+        sudo curl -s --compressed -o /usr/share/keyrings/arducam-keyring.pgp "https://arducam.github.io/arducam_ppa/KEY.gpg"
+        sudo curl -s --compressed -o /etc/apt/sources.list.d/arducam_list_files.sources "https://arducam.github.io/arducam_ppa/arducam_list_files.sources"
+    else
+        curl -s --compressed "https://arducam.github.io/arducam_ppa/KEY.gpg" | sudo apt-key add -
+        sudo curl -s --compressed -o /etc/apt/sources.list.d/arducam_list_files.list "https://arducam.github.io/arducam_ppa/arducam_list_files.list"
+    fi
 fi
 
 # install dependency

@@ -17,6 +17,13 @@ Clone this repository and enter the directory.
   cd Arducam_tof_camera
 ```
 
+
+## Arducam TOF Camera API Documentation
+
+For detailed API instructions, please refer to the official documentation:
+[Arducam TOF Camera Getting Started](https://www.arducam.com/docs/tof-camera-getting-started/)
+
+
 ### Install dependencies for Raspberry Pi
 
 > Run in the Arducam_tof_camera folder

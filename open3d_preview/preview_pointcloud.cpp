@@ -309,6 +309,9 @@ int main(int argc, char* argv[])
         }
     }
 
+    tof.setControl(Control::HFLIP, 0);
+    tof.setControl(Control::VFLIP, 1);
+
     if (tof.start(FrameType::DEPTH_FRAME)) {
         std::cerr << "Failed to start camera" << std::endl;
         return -1;

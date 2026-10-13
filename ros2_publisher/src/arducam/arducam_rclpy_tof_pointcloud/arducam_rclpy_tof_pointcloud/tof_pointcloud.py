@@ -64,6 +64,9 @@ class TOFPublisher(Node):
             print("Failed to open camera. Error code:", ret)
             return
 
+        tof.setControl(Control.HFLIP, 0)
+        tof.setControl(Control.VFLIP, 1)
+
         ret = tof.start(FrameType.DEPTH)
         if ret != 0:
             print("Failed to start camera. Error code:", ret)
